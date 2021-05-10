@@ -31,6 +31,15 @@ public:
     // Get spaceport id
     int getId();
 
+    // Get spaceport address
+    Address getAddress();
+
+    // Get spaceport name
+    string getName();
+
     // Get all spaceport information as a json string
     string getJsonString();
+
+    // Return the distance between this spaceport and the provided one
+    float getDistance(Spaceport *b);
 };

@@ -1,3 +1,5 @@
+#include <bits/stdc++.h>
+
 #include "server/lib/nlohmann/json.hpp"
 #include "spaceport.hpp"
 
@@ -16,6 +18,16 @@ int Spaceport::getId() {
 }
 
 
+Address Spaceport::getAddress() {
+    return address;
+}
+
+
+string Spaceport::getName() {
+    return name;
+}
+
+
 string Spaceport::getJsonString() {
     json x;
 
@@ -29,5 +41,18 @@ string Spaceport::getJsonString() {
     x["address"]["pos_x"] = address.pos_x;
     x["address"]["pos_y"] = address.pos_y;
 
-    return x.dump(4);
+    return x.dump();
+}
+
+
+
+float Spaceport::getDistance(Spaceport *port_b) {
+    Address a = address;
+    Address b = port_b->getAddress();
+
+    // Apply and return the distance formula
+    double z1 = pow(b.pos_x - a.pos_x, 2);
+    double z2 = pow(b.pos_y - a.pos_y, 2);
+
+    return (float) sqrt(z1 + z2 * 1.0);
 }

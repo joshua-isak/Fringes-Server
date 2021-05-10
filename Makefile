@@ -1,4 +1,4 @@
-CC = g++ -g -I.
+CC = g++ -g -I. -pthread
 CPPFLAGS =
 OBJS = main.o ship.o spaceport.o
 PROGS = run.exe

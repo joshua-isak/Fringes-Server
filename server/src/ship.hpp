@@ -39,7 +39,7 @@ private:
 
     ship_state travel_state;                // current ship travelling state
 
-    Spaceport *docked_spaceport;            // currently docked spaceport
+    Spaceport *current_spaceport;           // currently docked spaceport
 
 public:
     // Constructor
@@ -47,6 +47,9 @@ public:
 
     // Send the ship off to the destination spaceport
     int depart(Spaceport *destination);
+
+    // Mark the arrival of the ship to its destination
+    void arrive();
 
     // Add a cargo item to the ship
     int addCargo();
@@ -57,8 +60,17 @@ public:
     // Rename the ship
     int rename(string new_name);
 
+    // Get ship arrival time
+    time_t getArrivalTime();
+
+    // Get ship name
+    string getName();
+
     // Get ship id
     int getId();
+
+    // Get ship travel state
+    ship_state getState();
 
     // Get all ship information as a json string
     string getJsonString();
