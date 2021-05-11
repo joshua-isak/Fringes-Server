@@ -6,6 +6,9 @@
 
 using json = nlohmann::json;
 
+using namespace std;
+
+
 Ship::Ship(int _id, string _name, string _reg, ship_type _type, int m_w, int m_v, Spaceport *startport) {
     id = _id;
     name = _name;
@@ -48,11 +51,13 @@ ship_state Ship::getState() {
 
 int Ship::depart(Spaceport *destination) {
 
+    mtx.lock();
+
     // Find the warp time in seconds, 60 seconds for every distance 1, and cast to int
     float distance = destination->getDistance(current_spaceport);
     int warp_time = (int) (60 * distance);
 
-    // Update all variables relevant to travel
+    // Update all variables relevant to departure
     last_spaceport = current_spaceport;
     next_spaceport = destination;
     arrival_time = time(NULL) + warp_time;
@@ -66,12 +71,20 @@ int Ship::depart(Spaceport *destination) {
     << "[" << now->tm_hour << ":" << now->tm_min << ":" << now->tm_sec << "] "
     << registration << " " << name << " has departed " << last_spaceport->getName() << " for "
     << destination->getName() << " ETA: " << warp_time << " seconds" << endl;
+
+    mtx.unlock();
+
+    return 0;   // return the success state
 }
 
 
 void Ship::arrive() {
-    // Change the ship state
+
+    mtx.lock();
+
+    // Update all variables relevant to arrival
     travel_state = DOCKED;
+    current_spaceport = next_spaceport;
 
     // Log our arrival in the console
     time_t system_time = time(NULL);
@@ -79,16 +92,21 @@ void Ship::arrive() {
     cout
     << "[" << now->tm_hour << ":" << now->tm_min << ":" << now->tm_sec << "] "
     << registration << " " << name << " has arrived at " << next_spaceport->getName() << endl;
+
+    mtx.unlock();
 }
 
 
-int Ship::addCargo() {}
+int Ship::addCargo() { return 0; }
 
 
-int Ship::removeCargo() {}
+int Ship::removeCargo() { return 0; }
 
 
 string Ship::getJsonString() {
+
+    mtx.lock();
+
     json x;
 
     x["id"] = id;
@@ -106,6 +124,8 @@ string Ship::getJsonString() {
     x["departure_time"] = departure_time;
     x["arrival_time"] = arrival_time;
     x["travel_state"] = travel_state;
+
+    mtx.unlock();
 
     return x.dump();
 }

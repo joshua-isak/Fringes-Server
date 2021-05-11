@@ -27,16 +27,18 @@ void checkShipProgress(map <int, Ship*> *ships) {
         // Get the current UNIX timestamp
         current_time = time(NULL);
 
-        // Loop through all (currently warping) ships and check if their arrival time has passed, called arrive() if so
+        // Loop through all (currently warping) ships and check if their arrival time has passed, call arrive() if so
         for(it = ships->begin(); it != ships->end(); it++) {
 
-            // Look at the next ship if this one is not currently warping
-            if (it->second->getState() != WARP) { continue; }
+            Ship *this_ship = it->second;
 
-            time_t arrival_time = it->second->getArrivalTime();
+            // Skip checking this ship if this one is not currently warping
+            if (this_ship->getState() != WARP) { continue; }
+
+            time_t arrival_time = this_ship->getArrivalTime();
 
             if (current_time >= arrival_time) {
-                it->second->arrive();
+                this_ship->arrive();
             }
         }
 

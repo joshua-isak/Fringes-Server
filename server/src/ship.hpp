@@ -3,9 +3,12 @@
 #include <time.h>
 #include <string>
 #include <map>
+#include <mutex>
 
+#include "server/lib/nlohmann/json.hpp"
 #include "spaceport.hpp"
 
+using json = nlohmann::json;
 
 using namespace std;
 
@@ -41,6 +44,8 @@ private:
 
     Spaceport *current_spaceport;           // currently docked spaceport
 
+    mutex mtx;                              // mutex to lock critical sections of class functions
+
 public:
     // Constructor
     Ship(int _id, string _name, string _reg, ship_type _type, int m_w, int m_v, Spaceport *startport);
@@ -60,7 +65,7 @@ public:
     // Rename the ship
     int rename(string new_name);
 
-    // Get ship arrival time
+    // Get ship arrival time as a UNIX timestamp
     time_t getArrivalTime();
 
     // Get ship name

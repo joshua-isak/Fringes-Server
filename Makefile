@@ -1,5 +1,5 @@
 CC = g++ -g -I. -pthread
-CPPFLAGS =
+CPPFLAGS = -g -I.
 OBJS = main.o ship.o spaceport.o
 PROGS = run.exe
 
@@ -17,6 +17,9 @@ ship.o:
 
 spaceport.o:
 	$(CC) -c server/src/spaceport.cpp -o spaceport.o
+
+json.o:
+	$(CC) -c server/lib/nlohmann/json.hpp -o json.hpp.gch
 
 clean:
 	rm $(PROGS)

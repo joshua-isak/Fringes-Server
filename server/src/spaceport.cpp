@@ -1,9 +1,14 @@
-#include <bits/stdc++.h>
+#include <time.h>
+#include <string>
+#include <map>
 
 #include "server/lib/nlohmann/json.hpp"
 #include "spaceport.hpp"
 
 using json = nlohmann::json;
+
+using namespace std;
+
 
 Spaceport::Spaceport(int _id, string _name, int _class, Address _address) {
     id = _id;
