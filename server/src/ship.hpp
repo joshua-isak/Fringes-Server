@@ -77,6 +77,6 @@ public:
     // Get ship travel state
     ship_state getState();
 
-    // Get all ship information as a json string
+    // Return all ship information as a json string
     string getJsonString();
 };

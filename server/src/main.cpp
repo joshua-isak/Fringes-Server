@@ -6,10 +6,12 @@
 
 #include "ship.hpp"
 #include "spaceport.hpp"
+#include "connection.hpp"
 
 using namespace std;
 
 int PROGRESS_INTERVAL = 1;           // seconds to wait between checking the warp progress of all ships
+int MAX_CLIENTS = 10;                // maximum number of client connections
 
 map <int, Ship*> ships;              // map of all ships (id, pointer)
 map <int, Spaceport*> spaceports;    // map of all spaceports (id, pointer)
@@ -80,8 +82,14 @@ int main(int argc, char *argv[]) {
 
     ship_1->depart(port_2);
 
-    this_thread::sleep_for(chrono::seconds(14));
+    this_thread::sleep_for(chrono::seconds(1));
     ship_2->depart(port_1);
+
+    // Set up TCP listener
+    Connection *master = new Connection(0, "127.0.0.1", 4296);
+    if (master->startListener() > 0) {
+        cout << master->last_error << endl;
+    }
 
     t1.join();
 
