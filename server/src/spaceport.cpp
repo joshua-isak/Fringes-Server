@@ -7,8 +7,6 @@
 
 using json = nlohmann::json;
 
-using namespace std;
-
 
 Spaceport::Spaceport(int _id, string _name, int _class, Address _address) {
     id = _id;

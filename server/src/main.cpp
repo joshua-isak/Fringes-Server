@@ -4,24 +4,27 @@
 #include <time.h>
 #include <chrono>
 
-#include "ship.hpp"
-#include "spaceport.hpp"
-#include "connection.hpp"
+#include "server/src/globals.hpp"
 
-using namespace std;
+//#include "ship.hpp"
+//#include "spaceport.hpp"
+#include "server/src/network/listener.hpp"
+
+
 
 int PROGRESS_INTERVAL = 1;           // seconds to wait between checking the warp progress of all ships
 int MAX_CLIENTS = 10;                // maximum number of client connections
 
-map <int, Ship*> ships;              // map of all ships (id, pointer)
-map <int, Spaceport*> spaceports;    // map of all spaceports (id, pointer)
+// Global Variable Declarations
+std::map <int, Ship*> ships;              // map of all ships (id, pointer)
+std::map <int, Spaceport*> spaceports;    // map of all spaceports (id, pointer)
 
 
 
 // Periodically check if ships have arrived at their destination
-void checkShipProgress(map <int, Ship*> *ships) {
+void checkShipProgress(std::map <int, Ship*> *ships) {
 
-    map<int, Ship*>::iterator it;
+    std::map<int, Ship*>::iterator it;
     time_t current_time;
 
     while (true) {
@@ -45,7 +48,7 @@ void checkShipProgress(map <int, Ship*> *ships) {
         }
 
         // Wait PROGRESS_INTERVAL seconds until next check
-        this_thread::sleep_for(chrono::seconds(PROGRESS_INTERVAL));
+        std::this_thread::sleep_for(std::chrono::seconds(PROGRESS_INTERVAL));
     }
 }
 
@@ -53,7 +56,7 @@ void checkShipProgress(map <int, Ship*> *ships) {
 
 int main(int argc, char *argv[]) {
 
-    cout << "Initalizing Server..." << endl;
+    std::cout << "Initalizing Server..." << std::endl;
 
     // Initialize Spaceports
     Address new_address_1 = {"Sol", 1, 100, "some_string", 0, 0};
@@ -61,6 +64,7 @@ int main(int argc, char *argv[]) {
 
     Address new_address_2 = {"Alpha Centauri", 2, 100, "some_string", 1, 1};
     Spaceport *port_2 = new Spaceport(2, "Alpha Centauri II Station", 1, new_address_2);
+
 
     // Initialize ships
     int new_id = 1;
@@ -71,24 +75,20 @@ int main(int argc, char *argv[]) {
     Ship *ship_2 = new Ship(new_id, "Kelvin", "NCC-0514", MEDIUM, 16, 16, port_2);
     ships.insert({new_id, ship_2});
 
-    //string ship_info = ship_1->getJsonString();
-    //string station_info = port_1->getJsonString();
-    // cout << station_info << endl;
-    // cout << ship_info << endl;
-
 
     // Launch thread to check ship progress
-    thread t1(checkShipProgress, &ships);
+    std::thread t1(checkShipProgress, &ships);
 
     ship_1->depart(port_2);
 
-    this_thread::sleep_for(chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     ship_2->depart(port_1);
 
+
     // Set up TCP listener
-    Connection *master = new Connection(0, "127.0.0.1", 4296);
+    Listener *master = new Listener(0, "127.0.0.1", 4296);
     if (master->startListener() > 0) {
-        cout << master->last_error << endl;
+        std::cout << master->last_error << std::endl;
     }
 
     t1.join();

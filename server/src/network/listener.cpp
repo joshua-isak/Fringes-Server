@@ -3,32 +3,47 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <thread>
+#include <string>
 
+#include "server/src/globals.hpp"
+
+#include "listener.hpp"
 #include "connection.hpp"
 
-using namespace std;
 
-Connection::Connection(int _socket, const char * _ip, int _port) {
+Listener::Listener(int _socket, const char * _ip, int _port) {
     socket_id = _socket;
     ip = _ip;
     port = _port;
 }
 
 
-void connectionThread(Connection *master, int socket_id, struct sockaddr_in address) {
+// // Handle a TCP connection
+// void connectionThread(Listener *master, int socket_id, struct sockaddr_in address) {
 
-    cout << "New connection from IP: " << inet_ntoa(address.sin_addr) << " Port: " << address.sin_port << endl;
+//     cout << "New connection from IP: " << inet_ntoa(address.sin_addr) << " Port: " << address.sin_port << endl;
 
-    while (true) {
-        int BUFSIZE = 128;
-        char buffer[BUFSIZE] = {0};
-        recv(socket_id, buffer, BUFSIZE - 1, 0);
-        cout << buffer;
-    }
-}
+//     while (true) {
+
+//         // Print any data recieved on the socket
+//         int BUFSIZE = 128;
+//         char buffer[BUFSIZE] = {0};
+//         if (recv(socket_id, buffer, BUFSIZE - 1, 0) < 1) {
+//             cout << "connection closed" << endl;
+//             return;
+//         }
+//         cout << buffer;
+
+//         // Send data to the client
+//         string data = ships[1]->getJsonString();
+//         char outbuf[data.length()];
+//         strcpy(outbuf, data.c_str());
+//         send(socket_id, outbuf, sizeof(outbuf), 0);
+//     }
+// }
 
 
-int Connection::startListener() {
+int Listener::startListener() {
 
     cout << "Starting listener..." << endl;
 
@@ -62,7 +77,7 @@ int Connection::startListener() {
     }
 
     // Listen for new TCP connections
-    if (listen(server_fd, 3) < 0) {
+    if (listen(server_fd, BACKLOG) < 0) {
         last_error = "listener: listen failed";
         return 1;
     }
@@ -78,16 +93,10 @@ int Connection::startListener() {
         }
 
         // Start a new thread to handle the new connection
-        thread t(connectionThread, this, new_socket, address);
+        thread t(Connection(), new_socket, address);
         t.detach();
     }
 
-
-    valread = read(new_socket, buffer, 1024);
-    cout << buffer << endl;
-    //printf("%s\n",buffer );
-    //send(new_socket , hello , strlen(hello) , 0 );
-    //printf("Hello message sent\n");
 
     cout << "Listener stopped..." << endl;
 

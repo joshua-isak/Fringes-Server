@@ -6,7 +6,6 @@
 
 using json = nlohmann::json;
 
-using namespace std;
 
 
 Ship::Ship(int _id, string _name, string _reg, ship_type _type, int m_w, int m_v, Spaceport *startport) {
