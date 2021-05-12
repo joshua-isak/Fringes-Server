@@ -1,15 +1,21 @@
 #include <time.h>
 #include <iostream>
 
+#include "globals.hpp"
+
 #include "server/lib/nlohmann/json.hpp"
 #include "ship.hpp"
 
 using json = nlohmann::json;
 
 
+int Ship::last_issued_id = 1;
 
-Ship::Ship(int _id, string _name, string _reg, ship_type _type, int m_w, int m_v, Spaceport *startport) {
-    id = _id;
+
+Ship::Ship(string _name, string _reg, ship_type _type, int m_w, int m_v, Spaceport *startport) {
+    id = last_issued_id;
+    last_issued_id += 1;
+
     name = _name;
     registration = _reg;
     type = _type;
@@ -57,11 +63,15 @@ int Ship::depart(Spaceport *destination) {
     int warp_time = (int) (60 * distance);
 
     // Update all variables relevant to departure
+    time_t current_time = time(NULL);
     last_spaceport = current_spaceport;
     next_spaceport = destination;
-    arrival_time = time(NULL) + warp_time;
+    arrival_time = current_time + warp_time;
+    departure_time = current_time;
     total_warps += 1;
     travel_state = WARP;
+
+    mtx.unlock();
 
     // Log our departure and ETA in the console
     time_t system_time = time(NULL);
@@ -71,7 +81,8 @@ int Ship::depart(Spaceport *destination) {
     << registration << " " << name << " has departed " << last_spaceport->getName() << " for "
     << destination->getName() << " ETA: " << warp_time << " seconds" << endl;
 
-    mtx.unlock();
+    // Tell all clients this ship has departed
+    //--TODO--//
 
     return 0;   // return the success state
 }
@@ -85,6 +96,8 @@ void Ship::arrive() {
     travel_state = DOCKED;
     current_spaceport = next_spaceport;
 
+    mtx.unlock();
+
     // Log our arrival in the console
     time_t system_time = time(NULL);
     tm* now = localtime(&system_time);
@@ -92,7 +105,12 @@ void Ship::arrive() {
     << "[" << now->tm_hour << ":" << now->tm_min << ":" << now->tm_sec << "] "
     << registration << " " << name << " has arrived at " << next_spaceport->getName() << endl;
 
-    mtx.unlock();
+    // Tell all clients this ship has arrived
+    string data = this->getJsonString();
+    char outbuf[data.length()];
+    strcpy(outbuf, data.c_str());
+    Connection::sendAll(outbuf, sizeof(outbuf));
+
 }
 
 

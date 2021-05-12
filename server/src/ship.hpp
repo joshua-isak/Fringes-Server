@@ -19,36 +19,40 @@ enum ship_type {SMALL, MEDIUM, LARGE};
 
 
 class Ship {
+public:
+    static int last_issued_id;          // value of most recently issued ship id, used to generate new ship ids
+
 private:
-    int id;                                 // unique ship id
-    string name;                            // ship name
-    string registration;                    // unique registration number (static)
-    ship_type type;                         // ship class
 
-    int max_weight;                         // maximum total cargo weight
-    int max_volume;                         // maximum total cargo volume
+    int id;                             // unique ship id
+    string name;                        // ship name
+    string registration;                // unique registration number
+    ship_type type;                     // ship class
 
-    int total_warps;                        // number of times ship has entered warp
+    int max_weight;                     // maximum total cargo weight
+    int max_volume;                     // maximum total cargo volume
 
-    float reliability;                      // ship failure rate
+    int total_warps;                    // number of times ship has entered warp
 
-    //map <int, Cargo*> cargo;                // map containing ship's current cargo manifest
+    float reliability;                  // ship failure rate
 
-    Spaceport *last_spaceport;              // spaceport ship has departed from
-    Spaceport *next_spaceport;              // spaceport ship is travelling to
+    //map <int, Cargo*> cargo;            // map containing ship's current cargo manifest
 
-    time_t departure_time;                  // departure time from last spaceport
-    time_t arrival_time;                    // arrival time to next spaceport
+    Spaceport *last_spaceport;          // spaceport ship has departed from
+    Spaceport *next_spaceport;          // spaceport ship is travelling to
 
-    ship_state travel_state;                // current ship travelling state
+    time_t departure_time;              // departure time from last spaceport
+    time_t arrival_time;                // arrival time to next spaceport
 
-    Spaceport *current_spaceport;           // currently docked spaceport
+    ship_state travel_state;            // current ship travelling state
 
-    mutex mtx;                              // mutex to lock critical sections of class functions
+    Spaceport *current_spaceport;       // currently docked spaceport
+
+    mutex mtx;                          // mutex to lock critical sections of class functions
 
 public:
     // Constructor
-    Ship(int _id, string _name, string _reg, ship_type _type, int m_w, int m_v, Spaceport *startport);
+    Ship(string _name, string _reg, ship_type _type, int m_w, int m_v, Spaceport *startport);
 
     // Send the ship off to the destination spaceport
     int depart(Spaceport *destination);
