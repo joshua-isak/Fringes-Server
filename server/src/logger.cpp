@@ -21,8 +21,10 @@ void Logger::log_message(int thread_id, string message, int debug_lvl, string co
     // Find and add timestamp to output
     time_t system_time = time(NULL);
     tm* now = localtime(&system_time);
-    output = output + "[" + to_string(now->tm_hour)
-     + ":" + to_string(now->tm_min) + ":" + to_string(now->tm_sec) + "] ";
+    char timestamp[12] = {0};
+    strftime(timestamp, 12, "[%H:%M:%S] ", now);
+    output += timestamp;
+
 
     // Add color to output message and concatenate
     output = output + color + message;
