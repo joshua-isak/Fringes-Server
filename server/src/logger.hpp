@@ -26,5 +26,5 @@ public:
 
 
     // Print a debug message to the console
-    static void log_message(int thread_id, string message, int debug_lvl, string color);
+    static void log_message(string message, int debug_lvl, string color);
 };

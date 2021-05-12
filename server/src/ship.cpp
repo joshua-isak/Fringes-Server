@@ -88,7 +88,7 @@ int Ship::depart(Spaceport *destination) {
     string output;
     output = registration + " " + name + " has departed " + last_spaceport->getName()
     + " for " + destination->getName() + " ETA: " + to_string(warp_time) + " seconds";
-    Logger::log_message(0, output, 0, "");
+    Logger::log_message(output, 0, "");
 
     // Tell all clients this ship has departed
     //--TODO--//
@@ -110,7 +110,7 @@ void Ship::arrive() {
     // Log our arrival in the console
     string output;
     output = registration + " " + name + " has arrived at " + next_spaceport->getName();
-    Logger::log_message(0, output, 0, "");
+    Logger::log_message(output, 0, "");
 
     // Tell all clients this ship has arrived
     string data = this->getJsonString();

@@ -10,7 +10,7 @@ string Logger::RED = "\033[91m";
 string Logger::YELLOW = "\033[93m";
 
 
-void Logger::log_message(int thread_id, string message, int debug_lvl, string color) {
+void Logger::log_message(string message, int debug_lvl, string color) {
 
     // Check if this message should be displayed
     if (debug_level < debug_lvl) { return; }
