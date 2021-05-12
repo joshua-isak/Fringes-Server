@@ -9,6 +9,7 @@
 //#include "ship.hpp"
 //#include "spaceport.hpp"
 #include "server/src/network/listener.hpp"
+#include "server/src/logger.hpp"
 
 
 
@@ -56,7 +57,10 @@ void checkShipProgress(std::map <int, Ship*> *ships) {
 
 int main(int argc, char *argv[]) {
 
-    cout << "Initalizing Server..." << endl;
+    cout << "Starting server..." << endl;
+
+    // Set debug level for logger
+    Logger::debug_level = 4;
 
     // Initialize Spaceports
     Address new_address_1 = {"Sol", 1, 100, "some_string", 0, 0};
@@ -68,10 +72,10 @@ int main(int argc, char *argv[]) {
 
     // Initialize ships
     Ship *ship_1 = new Ship("Enterprise", "NCC-1701", SMALL, 16, 16, port_1);
-    ships.insert({ship_1->getId(), ship_1});
+    //ships.insert({ship_1->getId(), ship_1});
 
     Ship *ship_2 = new Ship("Kelvin", "NCC-0514", MEDIUM, 16, 16, port_2);
-    ships.insert({ship_2->getId(), ship_2});
+    //ships.insert({ship_2->getId(), ship_2});
 
 
     // Launch thread to check ship progress
@@ -86,7 +90,7 @@ int main(int argc, char *argv[]) {
     // Set up TCP listener
     Listener *master = new Listener(0, "127.0.0.1", 4296);
     if (master->startListener() > 0) {
-        cout << master->last_error << endl;
+        Logger::log_message(0, master->last_error, 0, Logger::RED);
     }
 
     t1.join();

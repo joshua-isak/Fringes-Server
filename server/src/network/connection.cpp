@@ -8,10 +8,16 @@
 #include "server/src/globals.hpp"
 
 #include "connection.hpp"
+#include "server/src/logger.hpp"
 
 
 void Connection::operator()(int _socket_id, struct sockaddr_in address) {
-    cout << "New connection from IP: " << inet_ntoa(address.sin_addr) << " Port: " << address.sin_port << endl;
+    string readable_ip = inet_ntoa(address.sin_addr);
+    readable_ip += ":" + to_string(address.sin_port);
+
+    Logger::log_message(0, "New connection from " + readable_ip, 0, Logger::YELLOW);
+
+    //cout << "New connection from IP: " << inet_ntoa(address.sin_addr) << " Port: " << address.sin_port << endl;
 
     socket_id = _socket_id;
     addr_port = address.sin_port;
@@ -25,7 +31,7 @@ void Connection::operator()(int _socket_id, struct sockaddr_in address) {
         int BUFSIZE = 128;
         char buffer[BUFSIZE] = {0};
         if (recv(socket_id, buffer, BUFSIZE - 1, 0) < 1) {
-            cout << "connection closed" << endl;
+            Logger::log_message(0, "Connection closed to " + readable_ip, 0, Logger::YELLOW);
             return;
         }
         cout << buffer;

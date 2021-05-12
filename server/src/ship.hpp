@@ -20,7 +20,7 @@ enum ship_type {SMALL, MEDIUM, LARGE};
 
 class Ship {
 public:
-    static int last_issued_id;          // value of most recently issued ship id, used to generate new ship ids
+    static int id_counter;              // value of next ship id to be issued
 
 private:
 

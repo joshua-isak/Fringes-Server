@@ -5,17 +5,24 @@
 
 #include "server/lib/nlohmann/json.hpp"
 #include "ship.hpp"
+#include "server/src/logger.hpp"
 
 using json = nlohmann::json;
 
 
-int Ship::last_issued_id = 1;
+int Ship::id_counter = 1;
 
 
 Ship::Ship(string _name, string _reg, ship_type _type, int m_w, int m_v, Spaceport *startport) {
-    id = last_issued_id;
-    last_issued_id += 1;
 
+    // Set unique id and iterate id counter
+    id = id_counter;
+    id_counter += 1;
+
+    // Add ship to map of all ships
+    ships.insert({id, this});
+
+    // Set initial variables
     name = _name;
     registration = _reg;
     type = _type;
@@ -53,6 +60,10 @@ ship_state Ship::getState() {
     return travel_state;
 }
 
+int Ship::getId() {
+    return id;
+}
+
 
 int Ship::depart(Spaceport *destination) {
 
@@ -74,12 +85,10 @@ int Ship::depart(Spaceport *destination) {
     mtx.unlock();
 
     // Log our departure and ETA in the console
-    time_t system_time = time(NULL);
-    tm* now = localtime(&system_time);
-    cout
-    << "[" << now->tm_hour << ":" << now->tm_min << ":" << now->tm_sec << "] "
-    << registration << " " << name << " has departed " << last_spaceport->getName() << " for "
-    << destination->getName() << " ETA: " << warp_time << " seconds" << endl;
+    string output;
+    output = registration + " " + name + " has departed " + last_spaceport->getName()
+    + " for " + destination->getName() + " ETA: " + to_string(warp_time) + " seconds";
+    Logger::log_message(0, output, 0, "");
 
     // Tell all clients this ship has departed
     //--TODO--//
@@ -99,11 +108,9 @@ void Ship::arrive() {
     mtx.unlock();
 
     // Log our arrival in the console
-    time_t system_time = time(NULL);
-    tm* now = localtime(&system_time);
-    cout
-    << "[" << now->tm_hour << ":" << now->tm_min << ":" << now->tm_sec << "] "
-    << registration << " " << name << " has arrived at " << next_spaceport->getName() << endl;
+    string output;
+    output = registration + " " + name + " has arrived at " + next_spaceport->getName();
+    Logger::log_message(0, output, 0, "");
 
     // Tell all clients this ship has arrived
     string data = this->getJsonString();
