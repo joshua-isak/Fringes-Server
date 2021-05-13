@@ -7,7 +7,6 @@ default: build
 
 build: $(OBJS)
 	$(CC) $(OBJS) -o $(PROGS)
-	rm $(OBJS)
 
 main.o:
 	$(CC) -c server/src/main.cpp -o main.o

@@ -23,7 +23,7 @@ void Connection::operator()(int _socket_id, struct sockaddr_in address) {
     socket_id = _socket_id;
     addr_port = address.sin_port;
 
-    // Conduct connection handshake
+    // Conduct connection handshake (read in client HELLO and send server WELCOME)
     if (this->handleHandshake() < 0) {
         Logger::log_message(last_error, 1, Logger::RED);  // close connection if there was an error
         this->close();
@@ -58,7 +58,9 @@ void Connection::close() {
     if (username != "") {
         Logger::log_message(username + " has disconnected", 0, Logger::YELLOW);
     }
+
     Logger::log_message("Connection closed to " + readable_ip, 1, Logger::YELLOW);
+
     //--TODO--//
     // Code to close this thread!
  }
@@ -71,6 +73,21 @@ int Connection::send(char data[], int data_size) {
     //mtx.unlock();
 
     return err;
+}
+
+
+int Connection::sendFrame(char data[], int data_size) {
+
+    char outbuf [data_size + 2] = {0};
+    uint16_t frame_len = data_size;
+
+    frame_len = be16toh(frame_len);     // translate frame length into network byte order
+
+    memcpy(outbuf, &frame_len, 2);
+    memcpy(outbuf + 2, data, data_size);
+
+    return this->send(outbuf, sizeof(outbuf));
+
 }
 
 
@@ -141,6 +158,20 @@ int Connection::handleHandshake() {
 
     // Verify password
     if (_password != password) { last_error = "connection: client password incorrect"; return -1; }
+
+
+    // Send server WELCOME
+    string w_command = "WELCOME";
+    uint8_t w_c_len = 7;
+    char w_outbuf[w_c_len + 1];
+
+    memcpy(w_outbuf, &w_c_len, 1);                      // write command length to buffer
+    strncpy(w_outbuf + 1, w_command.c_str(), 7);        // write command string to buffer
+
+    if ( this->sendFrame(w_outbuf, sizeof(w_outbuf)) < 0) {
+        last_error = "connection: handshake failed (3)";
+        return -1;
+    }
 
 
     // Complete connection
