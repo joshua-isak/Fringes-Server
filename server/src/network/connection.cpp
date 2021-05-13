@@ -92,30 +92,55 @@ int Connection::sendAll(char data[], int data_size) {
 int Connection::handleHandshake() {
 
     // Read in length of frame
-    uint16_t length;
-    if (recv(socket_id, &length, 2, 0) < 1) {
+    uint16_t f_length;
+    if (recv(socket_id, &f_length, 2, 0) < 1) {
         last_error = "connection: handshake failed (1)";
         return -1;
     }
 
     // Translate frame length from network byte order
-    length = be16toh(length);
-
-    cout << length << endl;
+    f_length = be16toh(f_length);
 
     // Read in rest of frame
-    char data[length];
-    if (recv(socket_id, &data, length, 0) < 1) {
-        last_error = "connection: handshake failed(2)";
+    char data[f_length];
+    if (recv(socket_id, &data, f_length, 0) < 1) {
+        last_error = "connection: handshake failed (2)";
         return -1;
     }
 
-    // Digest client's *supposed* HELLO packet
+    // Read in command string
+    int seek = 0;                                   // seek value of data buffer
+    int c_length = data[seek];                      // command string length
+    string command (&data[seek+1], c_length);       // command string
 
+    // Read in version string
+    seek += c_length + 1;
+    int v_length = data[seek];                      // version string length
+    string version (&data[seek+1], v_length);       // version string
+
+    // Read in username string
+    seek += v_length + 1;
+    int u_length = data[seek];                      // username string length
+    string username (&data[seek+1], u_length);      // username string
+
+    // Read in password string
+    seek += u_length + 1;
+    int p_length = data[seek];                      // password string length
+    string _password (&data[seek+1], p_length);     // password string
+
+
+    // Check if client sent the HELLO command
+    if (command != "HELLO") { last_error = "connection: malformed client HELLO"; return -1; }
+
+    // Make sure client version is compatible
+    if (version != version) { last_error = "connection: client version incompatible"; return -1; }
 
 
     // Add connection to global map of all active connections
     connections.insert({socket_id, this});
+
+    // Log client connection
+    Logger::log_message(username + " has connected", 0, Logger::YELLOW);
 
     return 0;   // return success
 }
