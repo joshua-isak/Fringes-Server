@@ -17,6 +17,8 @@ int PROGRESS_INTERVAL = 1;           // seconds to wait between checking the war
 int MAX_CLIENTS = 10;                // maximum number of client connections
 
 // Global Variable Declarations
+string password = "1234";              // Naive password management approach //--TODO--// NO PLAINTEXT PWDS
+
 map <int, Ship*> ships;                // map of all ships (id, pointer)
 map <int, Spaceport*> spaceports;      // map of all spaceports (id, pointer)
 map <int, Connection*> connections;         // map of all active TCP connections
@@ -89,7 +91,7 @@ int main(int argc, char *argv[]) {
 
     // Set up TCP listener
     Listener *master = new Listener(0, "127.0.0.1", 4296);
-    if (master->startListener() > 0) {
+    if (master->startListener() < 0) {
         Logger::log_message(master->last_error, 0, Logger::RED);
     }
 

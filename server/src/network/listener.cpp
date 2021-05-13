@@ -21,7 +21,7 @@ Listener::Listener(int _socket, const char * _ip, int _port) {
 
 int Listener::startListener() {
 
-    Logger::log_message(0, "Starting listener...", 0, "");
+    Logger::log_message("Starting listener...", 0, "");
 
     int server_fd, new_socket, valread;
     struct sockaddr_in address;
@@ -32,13 +32,13 @@ int Listener::startListener() {
     // Creating socket file descriptor
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
         last_error = "listener: failed to create socket";
-        return 1;
+        return -1;
     }
 
     // Forcefully attaching socket to the port 8080
     if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
         last_error = "listener: failed to setsockopt";
-        return 1;
+        return -1;
     }
 
     address.sin_family = AF_INET;
@@ -48,23 +48,23 @@ int Listener::startListener() {
     // Forcefully attaching socket to the port 8080
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
         last_error = "listener: socket bind failed";
-        return 1;
+        return -1;
     }
 
     // Listen for new TCP connections
     if (listen(server_fd, BACKLOG) < 0) {
         last_error = "listener: listen failed";
-        return 1;
+        return -1;
     }
 
-    Logger::log_message(0, "Listening for new connections on port " + to_string(port) + "...", 0, "");
+    Logger::log_message("Listening for new connections on port " + to_string(port) + "...", 0, "");
 
     while (true) {
 
         // Accept one new TCP connection
         if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0) {
             last_error = "listener: accept failed";
-            return 1;
+            return -1;
         }
 
         // Start a new thread to handle the new connection
@@ -72,7 +72,7 @@ int Listener::startListener() {
         t.detach();
     }
 
-    Logger::log_message(0, "Listener stopped.", 0, "");
+    Logger::log_message("Listener stopped.", 0, "");
 
     return 0;
 }
