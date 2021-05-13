@@ -13,6 +13,7 @@
 
 void Connection::operator()(int _socket_id, struct sockaddr_in address) {
     last_error = "";
+    username = "";
 
     readable_ip = inet_ntoa(address.sin_addr);
     readable_ip += ":" + to_string(address.sin_port);
@@ -54,6 +55,9 @@ void Connection::close() {
 
     // Close the file descriptor for this socket and log disconnection
     ::close(socket_id);
+    if (username != "") {
+        Logger::log_message(username + " has disconnected", 0, Logger::YELLOW);
+    }
     Logger::log_message("Connection closed to " + readable_ip, 1, Logger::YELLOW);
     //--TODO--//
     // Code to close this thread!
@@ -120,13 +124,13 @@ int Connection::handleHandshake() {
 
     // Read in username string
     seek += v_length + 1;
-    int u_length = data[seek];                      // username string length
-    string username (&data[seek+1], u_length);      // username string
+    int u_length = data[seek];                      // _username string length
+    string _username (&data[seek+1], u_length);     // _username string
 
     // Read in password string
     seek += u_length + 1;
-    int p_length = data[seek];                      // password string length
-    string _password (&data[seek+1], p_length);     // password string
+    int p_length = data[seek];                      // _password string length
+    string _password (&data[seek+1], p_length);     // _password string
 
 
     // Check if client sent the HELLO command
@@ -135,9 +139,13 @@ int Connection::handleHandshake() {
     // Make sure client version is compatible
     if (version != version) { last_error = "connection: client version incompatible"; return -1; }
 
+    // Verify password
+    if (_password != password) { last_error = "connection: client password incorrect"; return -1; }
 
-    // Add connection to global map of all active connections
-    connections.insert({socket_id, this});
+
+    // Complete connection
+    connections.insert({socket_id, this});      // add to map of connections
+    username = _username;                       // set connection's username
 
     // Log client connection
     Logger::log_message(username + " has connected", 0, Logger::YELLOW);

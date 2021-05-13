@@ -12,7 +12,8 @@ public:
     string readable_ip;     // human readable representation of ipv4 address
     int addr_port;          // human readable representation of port number
     int socket_id;          // file descriptor for this socket
-    string last_error;      // string containing description of last error
+    string last_error;      // description of last error
+    string username;        // username of connected client
     //mutex mtx;              // mutex to lock critical sections of code
 
 
