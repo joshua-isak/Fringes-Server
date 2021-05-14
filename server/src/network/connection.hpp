@@ -1,3 +1,12 @@
+/*
+Object that mannages an active TCP connection.
+
+Conducts a handshake to get client information (username, version, password)
+and verifies that it is correct. Then syncs game information to the client and
+continually updates it to game state changes on the server. Also handles commands
+sent from the client in a loop until the connection is closed.
+*/
+
 #pragma once
 
 #include <string>

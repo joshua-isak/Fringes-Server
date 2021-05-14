@@ -12,8 +12,7 @@
 #include "server/src/logger.hpp"
 
 
-Listener::Listener(int _socket, const char * _ip, int _port) {
-    socket_id = _socket;
+Listener::Listener(const char * _ip, int _port) {
     ip = _ip;
     port = _port;
 }

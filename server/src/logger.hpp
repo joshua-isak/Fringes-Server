@@ -1,3 +1,12 @@
+/*
+Static object that prints out well formatted debug messages to the console and/or
+writes them to a logfile.
+
+Prepends a timestamp to the message as well as provides message coloring.
+Uses a debug_lvl value to control the amount of messages displayed
+(higher debug level displays more specific messages)
+*/
+
 #pragma once
 
 
@@ -25,6 +34,11 @@ public:
     static string YELLOW;               // ANSI escape code for yellow
 
 
-    // Print a debug message to the console
+    /*
+    Print a debug message to the console.
+
+    debug_lvl specifies the debug level needed to display this message
+    color specifies a color for the debug message, timestamp excluded
+    */
     static void log_message(string message, int debug_lvl, string color);
 };

@@ -1,3 +1,8 @@
+/*
+Object that listens for new TCP connections on the specified ip/port number
+and spawns a new connection object thread to deal with the connection
+*/
+
 #pragma once
 
 #include <string>
@@ -16,14 +21,18 @@ public:
     string last_error;       // string containing description of last thrown error
 
 
-    // Constructor
-    Listener(int _socket, const char * _ip, int _port);
+    /*
+    Listener constructor
+    Needs an ipv4 address (char array) and port number (integer)
+    */
+    Listener(const char * _ip, int _port);
 
-    // Start a listener for new TCP connections (blocking)
+    /*
+    Start a listener for new TCP connections (blocking),
+    incoming connections are handled via a new thread (connection operator() ).
+
+    Returns -1 if there is an error and sets a string describing the error in Listener.last_error
+    */
     int startListener();
 
-    // Threadfunction to handle a new connection
-    int handleConnection(Listener *master, int socket_id, struct sockaddr_in address);
-
-    // void operator()(Connection *master, int socket_id, struct sockaddr_in address);
 };

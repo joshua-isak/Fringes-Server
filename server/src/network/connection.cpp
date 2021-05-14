@@ -29,12 +29,10 @@ void Connection::operator()(int _socket_id, struct sockaddr_in address) {
         return;
     }
 
-    // Send connection sync data for all ships
+    // Sync data for all ships
     map<int, Ship*>::iterator it;
     for (it = ships.begin(); it != ships.end(); it++) {
-
         Ship *this_ship = it->second;
-
         Connection::syncShip(socket_id, "INITIAL", this_ship->getJsonString());
     }
 

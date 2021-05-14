@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
 
 
     // Set up TCP listener
-    Listener *master = new Listener(0, "127.0.0.1", 4296);
+    Listener *master = new Listener("127.0.0.1", 4296);
     if (master->startListener() < 0) {
         Logger::log_message(master->last_error, 0, Logger::RED);
     }
