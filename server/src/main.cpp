@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
 
     ship_1->depart(port_2);
 
-    this_thread::sleep_for(chrono::seconds(1));
+    //this_thread::sleep_for(chrono::seconds(1));
     ship_2->depart(port_1);
 
 

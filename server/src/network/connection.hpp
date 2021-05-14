@@ -30,9 +30,15 @@ public:
     // Send data to all active connections, returns -1 for error
     static int sendAll(char data[], int data_size);
 
-    // Handle client handshake, returns -1 for error
-    int handleHandshake();
+    // Do client handshake, returns -1 for error
+    int doHandshake();
 
     // Prepend frame_len (data_size) to data[] and send it to this connection, returns send()'s values
     int sendFrame(char data[], int data_size);
+
+    // sendFrame to all active connections, returns -1 for error
+    static int sendFrameAll(char data[], int data_size);
+
+    // send json data and a sync value for a single ship to conn_id (conn_id 0 to send to all connections)
+    static int syncShip(int conn_id, string sync_type, string json_data);
 };

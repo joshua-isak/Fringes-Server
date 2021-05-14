@@ -14,20 +14,28 @@
 void Connection::operator()(int _socket_id, struct sockaddr_in address) {
     last_error = "";
     username = "";
+    socket_id = _socket_id;
+    addr_port = address.sin_port;
 
     readable_ip = inet_ntoa(address.sin_addr);
     readable_ip += ":" + to_string(address.sin_port);
 
     Logger::log_message("New connection from " + readable_ip, 1, Logger::YELLOW);
 
-    socket_id = _socket_id;
-    addr_port = address.sin_port;
-
     // Conduct connection handshake (read in client HELLO and send server WELCOME)
-    if (this->handleHandshake() < 0) {
+    if (this->doHandshake() < 0) {
         Logger::log_message(last_error, 1, Logger::RED);  // close connection if there was an error
         this->close();
         return;
+    }
+
+    // Send connection sync data for all ships
+    map<int, Ship*>::iterator it;
+    for (it = ships.begin(); it != ships.end(); it++) {
+
+        Ship *this_ship = it->second;
+
+        Connection::syncShip(socket_id, "INITIAL", this_ship->getJsonString());
     }
 
     while (true) {
@@ -81,7 +89,7 @@ int Connection::sendFrame(char data[], int data_size) {
     char outbuf [data_size + 2] = {0};
     uint16_t frame_len = data_size;
 
-    frame_len = be16toh(frame_len);     // translate frame length into network byte order
+    frame_len = htons(frame_len);           // translate frame length into network byte order
 
     memcpy(outbuf, &frame_len, 2);
     memcpy(outbuf + 2, data, data_size);
@@ -110,7 +118,26 @@ int Connection::sendAll(char data[], int data_size) {
 }
 
 
-int Connection::handleHandshake() {
+int Connection::sendFrameAll(char data[], int data_size) {
+
+    map <int, Connection*>::iterator it;
+    int error;
+
+    // Iterate through all connections and call sendFrame()
+    for (it = connections.begin(); it != connections.end(); it++) {
+
+        Connection *this_conn = it->second;
+
+        error = this_conn->sendFrame(data, data_size);
+
+        if (error == -1) { return -1; }
+    }
+
+    return error;
+}
+
+
+int Connection::doHandshake() {
 
     // Read in length of frame
     uint16_t f_length;
@@ -149,7 +176,6 @@ int Connection::handleHandshake() {
     int p_length = data[seek];                      // _password string length
     string _password (&data[seek+1], p_length);     // _password string
 
-
     // Check if client sent the HELLO command
     if (command != "HELLO") { last_error = "connection: malformed client HELLO"; return -1; }
 
@@ -159,8 +185,7 @@ int Connection::handleHandshake() {
     // Verify password
     if (_password != password) { last_error = "connection: client password incorrect"; return -1; }
 
-
-    // Send server WELCOME
+    // Send WELCOME to client
     string w_command = "WELCOME";
     uint8_t w_c_len = 7;
     char w_outbuf[w_c_len + 1];
@@ -173,7 +198,6 @@ int Connection::handleHandshake() {
         return -1;
     }
 
-
     // Complete connection
     connections.insert({socket_id, this});      // add to map of connections
     username = _username;                       // set connection's username
@@ -182,4 +206,47 @@ int Connection::handleHandshake() {
     Logger::log_message(username + " has connected", 0, Logger::YELLOW);
 
     return 0;   // return success
+}
+
+
+int Connection::syncShip(int conn_id, string sync_type, string json_data) {
+
+    string command = "SYNC_SHIP";
+
+    uint8_t command_len = command.length();
+    uint8_t sync_type_len = sync_type.length();
+    uint16_t json_len_h = json_data.length();                   // this value is host byte order
+
+    char outbuf [command_len + sync_type_len + json_len_h + 4]; // buffer of packet data
+    int seek = 0;                                               // current buffer seek
+
+    uint16_t json_len = htons(json_len_h);                      // translate to network byte order
+
+    // Write command data to buffer
+    memcpy(outbuf, &command_len, 1);                            // 1 because uint8's are 1 byte long
+    seek += 1;
+    strncpy(outbuf + seek, command.c_str(), command_len);
+    seek += command_len;
+
+    // Write sync_type data to buffer
+    memcpy(outbuf + seek, &sync_type_len, 1);
+    seek += 1;
+    strncpy(outbuf + seek, sync_type.c_str(), sync_type_len);
+    seek += sync_type_len;
+
+    // Write json_data to buffer
+    memcpy(outbuf + seek, &json_len, 2);                        // 2 because uint16's are 2 bytes long
+    seek += 2;
+    strncpy(outbuf + seek, json_data.c_str(), json_len_h);      // use host byte order len to not overflow :)
+
+    // Send this to all clients if conn_id is zero
+    if (conn_id == 0) {
+        return sendFrameAll(outbuf, sizeof(outbuf));
+    }
+
+    // Send it to connection conn_id if specified
+    else {
+        return connections[conn_id]->sendFrame(outbuf, sizeof(outbuf));
+    }
+
 }

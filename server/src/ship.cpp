@@ -91,7 +91,7 @@ int Ship::depart(Spaceport *destination) {
     Logger::log_message(output, 0, "");
 
     // Tell all clients this ship has departed
-    //--TODO--//
+    Connection::syncShip(0, "DEPART", this->getJsonString());
 
     return 0;   // return the success state
 }
@@ -113,10 +113,7 @@ void Ship::arrive() {
     Logger::log_message(output, 0, "");
 
     // Tell all clients this ship has arrived
-    string data = this->getJsonString();
-    char outbuf[data.length()];
-    strcpy(outbuf, data.c_str());
-    Connection::sendAll(outbuf, sizeof(outbuf));
+    Connection::syncShip(0, "ARRIVE", this->getJsonString());
 
 }
 
