@@ -42,7 +42,6 @@ void Connection::operator()(int _socket_id, struct sockaddr_in address) {
         int BUFSIZE = 128;
         char buffer[BUFSIZE] = {0};
         if (recv(socket_id, buffer, BUFSIZE - 1, 0) < 1) {
-            //Logger::log_message("Connection closed to " + readable_ip, 1, Logger::YELLOW);
             this->close();      // close the connection if there was a buffer read error
             return;
         }
@@ -87,7 +86,7 @@ int Connection::sendFrame(char data[], int data_size) {
     char outbuf [data_size + 2] = {0};
     uint16_t frame_len = data_size;
 
-    frame_len = htons(frame_len);           // translate frame length into network byte order
+    //werframe_len = htons(frame_len);           // translate frame length into network byte order
 
     memcpy(outbuf, &frame_len, 2);
     memcpy(outbuf + 2, data, data_size);
@@ -145,7 +144,7 @@ int Connection::doHandshake() {
     }
 
     // Translate frame length from network byte order
-    f_length = be16toh(f_length);
+    //f_length = be16toh(f_length);
 
     // Read in rest of frame
     char data[f_length];
@@ -154,27 +153,28 @@ int Connection::doHandshake() {
         return -1;
     }
 
-    // Read in command string
+    // Read in command string   //--TODO-- umm what if c_length > buffer size... these need mem protection!
     int seek = 0;                                   // seek value of data buffer
     int c_length = data[seek];                      // command string length
-    string command (&data[seek+1], c_length);       // command string
+    string command (&data[seek+1], c_length-1);     // command string (-1 to trim off extra whitespace)
 
     // Read in version string
     seek += c_length + 1;
     int v_length = data[seek];                      // version string length
-    string version (&data[seek+1], v_length);       // version string
+    string version (&data[seek+1], v_length-1);     // version string
 
     // Read in username string
     seek += v_length + 1;
     int u_length = data[seek];                      // _username string length
-    string _username (&data[seek+1], u_length);     // _username string
+    string _username (&data[seek+1], u_length-1);   // _username string
 
     // Read in password string
     seek += u_length + 1;
     int p_length = data[seek];                      // _password string length
-    string _password (&data[seek+1], p_length);     // _password string
+    string _password (&data[seek+1], p_length-1);   // _password string
 
     // Check if client sent the HELLO command
+    string hello = "HELLO";
     if (command != "HELLO") { last_error = "connection: malformed client HELLO"; return -1; }
 
     // Make sure client version is compatible
@@ -185,11 +185,11 @@ int Connection::doHandshake() {
 
     // Send WELCOME to client
     string w_command = "WELCOME";
-    uint8_t w_c_len = 7;
+    uint8_t w_c_len = 7 + 1;                // +1 to include string null terminator
     char w_outbuf[w_c_len + 1];
 
     memcpy(w_outbuf, &w_c_len, 1);                      // write command length to buffer
-    strncpy(w_outbuf + 1, w_command.c_str(), 7);        // write command string to buffer
+    strcpy(w_outbuf + 1, w_command.c_str());            // write command string to buffer
 
     if ( this->sendFrame(w_outbuf, sizeof(w_outbuf)) < 0) {
         last_error = "connection: handshake failed (3)";
@@ -211,31 +211,29 @@ int Connection::syncShip(int conn_id, string sync_type, string json_data) {
 
     string command = "SYNC_SHIP";
 
-    uint8_t command_len = command.length();
-    uint8_t sync_type_len = sync_type.length();
-    uint16_t json_len_h = json_data.length();                   // this value is host byte order
+    uint8_t command_len = command.length() + 1;             // +1 to include string null terminator
+    uint8_t sync_type_len = sync_type.length() + 1;
+    uint16_t json_len = json_data.length() + 1;
 
-    char outbuf [command_len + sync_type_len + json_len_h + 4]; // buffer of packet data
+    char outbuf [command_len + sync_type_len + json_len + 4];   // buffer of packet data
     int seek = 0;                                               // current buffer seek
-
-    uint16_t json_len = htons(json_len_h);                      // translate to network byte order
 
     // Write command data to buffer
     memcpy(outbuf, &command_len, 1);                            // 1 because uint8's are 1 byte long
     seek += 1;
-    strncpy(outbuf + seek, command.c_str(), command_len);
+    strcpy(outbuf + seek, command.c_str());//, command_len);
     seek += command_len;
 
     // Write sync_type data to buffer
     memcpy(outbuf + seek, &sync_type_len, 1);
     seek += 1;
-    strncpy(outbuf + seek, sync_type.c_str(), sync_type_len);
+    strcpy(outbuf + seek, sync_type.c_str());//, sync_type_len);
     seek += sync_type_len;
 
     // Write json_data to buffer
     memcpy(outbuf + seek, &json_len, 2);                        // 2 because uint16's are 2 bytes long
     seek += 2;
-    strncpy(outbuf + seek, json_data.c_str(), json_len_h);      // use host byte order len to not overflow :)
+    strcpy(outbuf + seek, json_data.c_str());//, json_len);
 
     // Send this to all clients if conn_id is zero
     if (conn_id == 0) {

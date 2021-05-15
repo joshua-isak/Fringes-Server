@@ -35,7 +35,7 @@ void checkShipProgress(std::map <int, Ship*> *ships) {
         // Get the current UNIX timestamp
         current_time = time(NULL);
 
-        // Loop through all (currently warping) ships and check if their arrival time has passed, call arrive() if so
+        // Loop through all warping ships and check if their arrival time has passed, call arrive() if so
         for (it = ships->begin(); it != ships->end(); it++) {
 
             Ship *this_ship = it->second;
