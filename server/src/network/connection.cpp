@@ -239,16 +239,10 @@ int Connection::syncShip(int conn_id, string sync_type, string json_data) {
     int seek = 0;                                               // current buffer seek
 
     // Write command data to buffer
-    memcpy(outbuf, &command_len, 1);                            // 1 because uint8's are 1 byte long
-    seek += 1;
-    strcpy(outbuf + seek, command.c_str());//, command_len);
-    seek += command_len;
+    Connection::writeCommand(outbuf, command, &seek);
 
-    // Write sync_type data to buffer
-    memcpy(outbuf + seek, &sync_type_len, 1);
-    seek += 1;
-    strcpy(outbuf + seek, sync_type.c_str());//, sync_type_len);
-    seek += sync_type_len;
+    // Write sync_type data to buffer (sub command)
+    Connection::writeCommand(outbuf, sync_type, &seek);
 
     // Write json_data to buffer
     memcpy(outbuf + seek, &json_len, 2);                        // 2 because uint16's are 2 bytes long
@@ -280,16 +274,10 @@ int Connection::syncStation(int conn_id, string sync_type, string json_data) {
     int seek = 0;                                               // current buffer seek
 
     // Write command data to buffer
-    memcpy(outbuf, &command_len, 1);                            // 1 because uint8's are 1 byte long
-    seek += 1;
-    strcpy(outbuf + seek, command.c_str());//, command_len);
-    seek += command_len;
+    Connection::writeCommand(outbuf, command, &seek);
 
-    // Write sync_type data to buffer
-    memcpy(outbuf + seek, &sync_type_len, 1);
-    seek += 1;
-    strcpy(outbuf + seek, sync_type.c_str());//, sync_type_len);
-    seek += sync_type_len;
+    // Write sync_type data to buffer (sub command)
+    Connection::writeCommand(outbuf, sync_type, &seek);
 
     // Write json_data to buffer
     memcpy(outbuf + seek, &json_len, 2);                        // 2 because uint16's are 2 bytes long
@@ -349,28 +337,37 @@ int Connection::sendError(string error_message) {
 
     string command = "SEND_ERROR";
 
-    uint8_t command_len = command.length() + 1;         // +1 to include string null terminator
-    uint8_t error_len = error_message.length() + 1;         // cannot exceed 255 bytes
+    uint8_t command_len = command.length() + 1;             // +1 to include string null terminator
+    uint8_t error_len = error_message.length() + 1;         // +1 for null terminator, cannot exceed 255 bytes
 
     // Make sure the error message is not too long
     if (error_len > 250) { return -1; }
 
-    char outbuf [command_len + error_len + 1 + 1];      // +1+1 for 2 uint8
+    char outbuf [command_len + error_len + 1 + 1];          // +1+1 for 2 uint8
     int seek = 0;
 
-    // Write command data to buffer     //--TODO--// Make this whole thing its own function!
-    memcpy(outbuf, &command_len, 1);                            // 1 because uint8's are 1 byte long
-    seek += 1;
-    strcpy(outbuf + seek, command.c_str());//, command_len);
-    seek += command_len;
+    // Write command data to buffer
+    this->writeCommand(outbuf, command, &seek);
 
     // Write error_message to buffer
-    memcpy(outbuf + seek, &error_len, 1);               // write in error_len
+    memcpy(outbuf + seek, &error_len, 1);                   // write in error_len
     seek += 1;
-    strcpy(outbuf + seek, error_message.c_str());       // write in error_message
+    strcpy(outbuf + seek, error_message.c_str());           // write in error_message
 
     // Send the packet to the client
     this->sendFrame(outbuf, sizeof(outbuf));
 
     return 0;       // return success
+}
+
+
+void Connection::writeCommand(char buffer[], string command, int *seek) {
+    //--TODO--// ADD CHECKING FOR BUFFER OVERFLOW
+    uint8_t command_len = command.length() + 1;             // +1 to include string null terminator
+
+    // Write command data to buffer
+    memcpy(buffer, &command_len, 1);                        // 1 because uint8's are 1 byte long
+    *seek += 1;
+    strcpy(buffer + *seek, command.c_str());                 // write command string
+    *seek += command_len;
 }

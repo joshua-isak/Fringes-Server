@@ -16,6 +16,9 @@ sent from the client in a loop until the connection is closed.
 using namespace std;
 
 
+enum buffer_data_type {UINT8, UINT16, STRING};
+
+
 class Connection {
 private:
     string readable_ip;     // human readable representation of ipv4 address
@@ -59,4 +62,7 @@ public:
 
     // send an error string to the client
     int sendError(string error_message);
+
+    // write the command_len and command to a buffer and update its seek value
+    static void writeCommand(char buffer[], string command, int *seek);
 };
