@@ -8,6 +8,8 @@ int Logger::debug_level = 0;
 
 string Logger::RED = "\033[91m";
 string Logger::YELLOW = "\033[93m";
+string Logger::CYAN = "\033[96m";
+string Logger::GREEN = "\033[92m";
 
 
 void Logger::log_message(string message, int debug_lvl, string color) {

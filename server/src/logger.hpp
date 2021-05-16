@@ -18,10 +18,6 @@ using namespace std;
 
 // ANSI escape codes for colorful text output
 #define NO_COL  ""
-//#define RED     "\033[91m"
-#define GREEN   "\033[92m"
-//#define YELLOW  "\033[93m"
-#define CYAN    "\033[96m"
 #define COL_END "\033[0m"
 
 
@@ -32,6 +28,8 @@ public:
 
     static string RED;                  // ANSI escape code for red
     static string YELLOW;               // ANSI escape code for yellow
+    static string CYAN;
+    static string GREEN;
 
 
     /*

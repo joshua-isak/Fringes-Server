@@ -91,6 +91,8 @@ int Connection::send(char data[], int data_size) {
     int err = ::send(socket_id, data, data_size, 0);
     //mtx.unlock();
 
+    Logger::log_message("sent packet to " + this->username, 3, Logger::CYAN);
+
     return err;
 }
 
