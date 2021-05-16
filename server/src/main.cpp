@@ -82,16 +82,16 @@ int main(int argc, char *argv[]) {
 
 /////////////////////////
     Address new_address_6 = {"Altair", 2, 100, "some_string", -2.8, -0.3};
-    Spaceport *port_5 = new Spaceport(6, "Altair I", 1, new_address_6);
+    Spaceport *port_6 = new Spaceport(6, "Altair I", 1, new_address_6);
 
     Address new_address_7 = {"Deneb", 2, 100, "some_string", -1.3, -3};
-    Spaceport *port_5 = new Spaceport(7, "Deneb IV", 1, new_address_7);
+    Spaceport *port_7 = new Spaceport(7, "Deneb IV", 1, new_address_7);
 
     Address new_address_8 = {"Vega", 2, 100, "some_string", -0.5, 2.5};
-    Spaceport *port_5 = new Spaceport(8, "Vega Prime", 1, new_address_8);
+    Spaceport *port_8 = new Spaceport(8, "Vega Prime", 1, new_address_8);
 
     Address new_address_9 = {"Betelgeuse", 2, 100, "some_string", -3, -3.3};
-    Spaceport *port_5 = new Spaceport(9, "Betelgeuse Station", 1, new_address_9);
+    Spaceport *port_9 = new Spaceport(9, "Betelgeuse Station", 1, new_address_9);
 
 
     // Initialize ships
