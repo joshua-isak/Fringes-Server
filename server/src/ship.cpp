@@ -73,6 +73,20 @@ int Ship::depart(Spaceport *destination) {
     float distance = destination->getDistance(current_spaceport);
     int warp_time = (int) (60 * distance);
 
+    // Check if this ship is already warping
+    if (travel_state == WARP) {
+        last_error = registration + " already in warp!";
+        mtx.unlock();
+        return -1;
+    }
+
+    // Check if we are already at the destination
+    if (destination == current_spaceport) {
+        last_error = registration + " already at destination!";
+        mtx.unlock();
+        return -1;
+    }
+
     // Update all variables relevant to departure
     time_t current_time = time(NULL);
     last_spaceport = current_spaceport;

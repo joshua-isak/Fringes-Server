@@ -2,6 +2,8 @@
 #include <string>
 #include <map>
 
+#include "globals.hpp"
+
 #include "server/lib/nlohmann/json.hpp"
 #include "spaceport.hpp"
 
@@ -13,6 +15,9 @@ Spaceport::Spaceport(int _id, string _name, int _class, Address _address) {
     name = _name;
     station_class = _class;
     address = _address;
+
+    // Add spaceport to map of all spaceports
+    spaceports.insert({id, this});
 }
 
 

@@ -21,6 +21,7 @@ enum ship_type {SMALL, MEDIUM, LARGE};
 class Ship {
 public:
     static int id_counter;              // value of next ship id to be issued
+    string last_error;
 
 private:
 

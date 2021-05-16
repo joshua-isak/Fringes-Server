@@ -68,25 +68,35 @@ int main(int argc, char *argv[]) {
     Address new_address_1 = {"Sol", 1, 100, "some_string", 0, 0};
     Spaceport *port_1 = new Spaceport(1, "Terra Station", 1, new_address_1);
 
-    Address new_address_2 = {"Alpha Centauri", 2, 100, "some_string", 0.2, 0.2};
-    Spaceport *port_2 = new Spaceport(2, "Alpha Centauri II Station", 1, new_address_2);
+    Address new_address_2 = {"Alpha Centauri", 2, 100, "some_string", 1, 1};
+    Spaceport *port_2 = new Spaceport(2, "Alpha Centauri II", 1, new_address_2);
+
+    Address new_address_3 = {"Polaris", 2, 100, "some_string", 2.5, -0.4};
+    Spaceport *port_3 = new Spaceport(3, "Polaris V", 1, new_address_3);
+
+    Address new_address_4 = {"Proxima Centauri", 2, 100, "some_string", 2, -2};
+    Spaceport *port_4 = new Spaceport(4, "Proxima Centauri I", 1, new_address_4);
+
+    Address new_address_5 = {"Durandal", 2, 100, "some_string", -2, -2};
+    Spaceport *port_5 = new Spaceport(5, "Durandal III", 1, new_address_5);
 
 
     // Initialize ships
     Ship *ship_1 = new Ship("Enterprise", "NCC-1701", SMALL, 16, 16, port_1);
-    //ships.insert({ship_1->getId(), ship_1});
-
     Ship *ship_2 = new Ship("Kelvin", "NCC-0514", MEDIUM, 16, 16, port_2);
-    //ships.insert({ship_2->getId(), ship_2});
+    Ship *ship_3 = new Ship("Autumn", "NCC-4196", MEDIUM, 16, 16, port_3);
+    Ship *ship_4 = new Ship("Orville", "NCC-789", MEDIUM, 16, 16, port_4);
+    Ship *ship_5 = new Ship("Serenity", "FF-055", MEDIUM, 16, 16, port_5);
+    Ship *ship_6 = new Ship("Aquaria", "NMS-1444", MEDIUM, 16, 16, port_5);
 
 
     // Launch thread to check ship progress
     thread t1(checkShipProgress, &ships);
 
-    ship_1->depart(port_2);
-
-    //this_thread::sleep_for(chrono::seconds(1));
+    ship_1->depart(port_3);
     ship_2->depart(port_1);
+    ship_3->depart(port_5);
+    ship_4->depart(port_5);
 
 
     // Set up TCP listener

@@ -29,6 +29,13 @@ void Connection::operator()(int _socket_id, struct sockaddr_in address) {
         return;
     }
 
+    // Sync data for all spaceports
+    map<int, Spaceport*>::iterator itt;
+    for (itt = spaceports.begin(); itt != spaceports.end(); itt++) {
+        Spaceport *this_spaceport = itt->second;
+        Connection::syncStation(socket_id, "INITIAL", this_spaceport->getJsonString());
+    }
+
     // Sync data for all ships
     map<int, Ship*>::iterator it;
     for (it = ships.begin(); it != ships.end(); it++) {
@@ -38,20 +45,27 @@ void Connection::operator()(int _socket_id, struct sockaddr_in address) {
 
     while (true) {
 
-        // Print any data recieved on the socket
-        int BUFSIZE = 128;
-        char buffer[BUFSIZE] = {0};
-        if (recv(socket_id, buffer, BUFSIZE - 1, 0) < 1) {
-            this->close();      // close the connection if there was a buffer read error
+        // Read in length of frame
+        uint16_t f_length;
+        if (recv(socket_id, &f_length, 2, 0) < 1) {
+            Logger::log_message("connection: failed to read from socket", 1, Logger::RED);
+            this->close();
             return;
         }
-        cout << buffer;
 
-        // Send data to the client
-        string data = ships[1]->getJsonString();
-        char outbuf[data.length()];
-        strcpy(outbuf, data.c_str());
-        this->send(outbuf, sizeof(outbuf));
+        // Read in rest of frame
+        char data[f_length];
+        recv(socket_id, &data, f_length, 0);        //--TODO--// THIS REALLY NEEDS ERROR CHECKING, MAKE A READ FUNCTION
+
+        // Read in command string   //--TODO-- umm what if c_length > buffer size... these need mem protection!
+        int seek = 0;                                   // seek value of data buffer
+        int c_length = data[seek];                      // command string length
+        string command (&data[seek+1], c_length-1);     // command string (-1 to trim off extra whitespace)
+        seek += c_length + 1;
+
+        // Switch statements only work with integral types :(((
+        if (command == "SEND_SHIP") { this->handleShipSend(data, seek); }
+
     }
 }
 
@@ -245,4 +259,78 @@ int Connection::syncShip(int conn_id, string sync_type, string json_data) {
         return connections[conn_id]->sendFrame(outbuf, sizeof(outbuf));
     }
 
+}
+
+
+int Connection::syncStation(int conn_id, string sync_type, string json_data) {
+
+    string command = "SYNC_STATION";
+
+    uint8_t command_len = command.length() + 1;             // +1 to include string null terminator
+    uint8_t sync_type_len = sync_type.length() + 1;
+    uint16_t json_len = json_data.length() + 1;
+
+    char outbuf [command_len + sync_type_len + json_len + 4];   // buffer of packet data
+    int seek = 0;                                               // current buffer seek
+
+    // Write command data to buffer
+    memcpy(outbuf, &command_len, 1);                            // 1 because uint8's are 1 byte long
+    seek += 1;
+    strcpy(outbuf + seek, command.c_str());//, command_len);
+    seek += command_len;
+
+    // Write sync_type data to buffer
+    memcpy(outbuf + seek, &sync_type_len, 1);
+    seek += 1;
+    strcpy(outbuf + seek, sync_type.c_str());//, sync_type_len);
+    seek += sync_type_len;
+
+    // Write json_data to buffer
+    memcpy(outbuf + seek, &json_len, 2);                        // 2 because uint16's are 2 bytes long
+    seek += 2;
+    strcpy(outbuf + seek, json_data.c_str());//, json_len);
+
+    // Send this to all clients if conn_id is zero
+    if (conn_id == 0) {
+        return sendFrameAll(outbuf, sizeof(outbuf));
+    }
+
+    // Send it to connection conn_id if specified
+    else {
+        return connections[conn_id]->sendFrame(outbuf, sizeof(outbuf));
+    }
+
+}
+
+
+int Connection::handleShipSend(char data[], int seek) {
+
+    // Read in ship id
+    int ship_id = data[seek];
+    seek += 2;
+
+    // Read in destination station id
+    int dest_id = data[seek];
+
+    // Check if the shipID is valid
+    if (ships.find(ship_id) == ships.end()) {
+        Logger::log_message("connection: send_ship: client send bad ship_id", 0, Logger::RED);
+        return -1;
+    }
+
+    // Check if the spaceportID is valid
+    if (spaceports.find(dest_id) == spaceports.end()) {
+        Logger::log_message("connection: send_ship: client send bad spaceport_id", 0, Logger::RED);
+        return -1;
+    }
+
+    // Attempt to send the ship to the destination spaceport, print any errors
+    Ship *this_ship = ships[ship_id];
+    Spaceport *that_spaceport = spaceports[dest_id];
+    if (this_ship->depart(that_spaceport) < 0) {
+        Logger::log_message("connection: send_ship: " + this_ship->last_error, 0, Logger::RED);
+        return -1;
+    }
+
+    return 0;   // return success
 }

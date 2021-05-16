@@ -50,4 +50,10 @@ public:
 
     // send json data and a sync value for a single ship to conn_id (conn_id 0 to send to all connections)
     static int syncShip(int conn_id, string sync_type, string json_data);
+
+    // send json data and a sync value for a single station to conn_id (conn_id 0 to send to all connections)
+    static int syncStation(int conn_id, string sync_type, string json_data);
+
+    // depart a ship to a destination station, takes data to read from and current seek of that data
+    int handleShipSend(char data[], int seek);
 };
