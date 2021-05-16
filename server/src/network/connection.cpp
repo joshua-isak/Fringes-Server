@@ -72,8 +72,11 @@ void Connection::operator()(int _socket_id, struct sockaddr_in address) {
 
 void Connection::close() {
 
-    // Close the file descriptor for this socket and log disconnection
+    // Close the file descriptor for this socket and remove from map of connections
     ::close(socket_id);
+    connections.erase(socket_id);
+
+    // Log disconnection
     if (username != "") {
         Logger::log_message(username + " has disconnected", 0, Logger::YELLOW);
     }
