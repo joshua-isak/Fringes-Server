@@ -63,6 +63,7 @@ void Connection::operator()(int _socket_id, struct sockaddr_in address) {
         string command (&data[seek+1], c_length-1);     // command string (-1 to trim off extra whitespace)
         seek += c_length + 1;
 
+        // Handle client command
         // Switch statements only work with integral types :(((
         if (command == "SEND_SHIP") { this->handleShipSend(data, seek); }
 
@@ -320,12 +321,14 @@ int Connection::handleShipSend(char data[], int seek) {
     // Check if the shipID is valid
     if (ships.find(ship_id) == ships.end()) {
         Logger::log_message("connection: send_ship: client send bad ship_id", 0, Logger::RED);
+        this->sendError("ship id invalid!");
         return -1;
     }
 
     // Check if the spaceportID is valid
     if (spaceports.find(dest_id) == spaceports.end()) {
         Logger::log_message("connection: send_ship: client send bad spaceport_id", 0, Logger::RED);
+        this->sendError("spaceport id invalid!");
         return -1;
     }
 
@@ -334,8 +337,40 @@ int Connection::handleShipSend(char data[], int seek) {
     Spaceport *that_spaceport = spaceports[dest_id];
     if (this_ship->depart(that_spaceport) < 0) {
         Logger::log_message("connection: send_ship: " + this_ship->last_error, 0, Logger::RED);
+        this->sendError(this_ship->last_error);
         return -1;
     }
 
     return 0;   // return success
+}
+
+
+int Connection::sendError(string error_message) {
+
+    string command = "SEND_ERROR";
+
+    uint8_t command_len = command.length() + 1;         // +1 to include string null terminator
+    uint8_t error_len = error_message.length() + 1;         // cannot exceed 255 bytes
+
+    // Make sure the error message is not too long
+    if (error_len > 250) { return -1; }
+
+    char outbuf [command_len + error_len + 1 + 1];      // +1+1 for 2 uint8
+    int seek = 0;
+
+    // Write command data to buffer     //--TODO--// Make this whole thing its own function!
+    memcpy(outbuf, &command_len, 1);                            // 1 because uint8's are 1 byte long
+    seek += 1;
+    strcpy(outbuf + seek, command.c_str());//, command_len);
+    seek += command_len;
+
+    // Write error_message to buffer
+    memcpy(outbuf + seek, &error_len, 1);               // write in error_len
+    seek += 1;
+    strcpy(outbuf + seek, error_message.c_str());       // write in error_message
+
+    // Send the packet to the client
+    this->sendFrame(outbuf, sizeof(outbuf));
+
+    return 0;       // return success
 }

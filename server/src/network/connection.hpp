@@ -56,4 +56,7 @@ public:
 
     // depart a ship to a destination station, takes data to read from and current seek of that data
     int handleShipSend(char data[], int seek);
+
+    // send an error string to the client
+    int sendError(string error_message);
 };
