@@ -66,32 +66,32 @@ int main(int argc, char *argv[]) {
 
     // Initialize Spaceports
     Address new_address_1 = {"Sol", 1, 100, "some_string", 0, 0};
-    Spaceport *port_1 = new Spaceport(1, "Terra Station", 1, new_address_1);
+    Spaceport *port_1 = new Spaceport("Terra Station", 1, new_address_1);
 
     Address new_address_2 = {"Alpha Centauri", 2, 100, "some_string", 1, 1};
-    Spaceport *port_2 = new Spaceport(2, "Alpha Centauri II", 1, new_address_2);
+    Spaceport *port_2 = new Spaceport("Alpha Centauri II", 1, new_address_2);
 
     Address new_address_3 = {"Polaris", 2, 100, "some_string", 2.5, -0.4};
-    Spaceport *port_3 = new Spaceport(3, "Polaris V", 1, new_address_3);
+    Spaceport *port_3 = new Spaceport("Polaris V", 1, new_address_3);
 
     Address new_address_4 = {"Proxima Centauri", 2, 100, "some_string", 2, -2};
-    Spaceport *port_4 = new Spaceport(4, "Proxima Centauri I", 1, new_address_4);
+    Spaceport *port_4 = new Spaceport("Proxima Centauri I", 1, new_address_4);
 
     Address new_address_5 = {"Durandal", 2, 100, "some_string", -1.8, -2};
-    Spaceport *port_5 = new Spaceport(5, "Durandal III", 1, new_address_5);
+    Spaceport *port_5 = new Spaceport("Durandal III", 1, new_address_5);
 
 /////////////////////////
     Address new_address_6 = {"Altair", 2, 100, "some_string", -2.8, -0.3};
-    Spaceport *port_6 = new Spaceport(6, "Altair I", 1, new_address_6);
+    Spaceport *port_6 = new Spaceport("Altair I", 1, new_address_6);
 
     Address new_address_7 = {"Deneb", 2, 100, "some_string", -1.3, -3};
-    Spaceport *port_7 = new Spaceport(7, "Deneb IV", 1, new_address_7);
+    Spaceport *port_7 = new Spaceport("Deneb IV", 1, new_address_7);
 
     Address new_address_8 = {"Vega", 2, 100, "some_string", -0.5, 2.5};
-    Spaceport *port_8 = new Spaceport(8, "Vega Prime", 1, new_address_8);
+    Spaceport *port_8 = new Spaceport("Vega Prime", 1, new_address_8);
 
-    Address new_address_9 = {"Betelgeuse", 2, 100, "some_string", -3, -3.3};
-    Spaceport *port_9 = new Spaceport(9, "Betelgeuse Station", 1, new_address_9);
+    Address new_address_9 = {"Betelgeuse", 2, 100, "some_string", -3, 2};
+    Spaceport *port_9 = new Spaceport("Betelgeuse Station", 1, new_address_9);
 
 
     // Initialize ships

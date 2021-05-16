@@ -9,9 +9,16 @@
 
 using json = nlohmann::json;
 
+int Spaceport::id_counter = 1;
 
-Spaceport::Spaceport(int _id, string _name, int _class, Address _address) {
-    id = _id;
+Spaceport::Spaceport(string _name, int _class, Address _address) {
+
+    // Set unique id and iterate id counter
+    id = id_counter;
+    id_counter += 1;
+
+    // Set initial variables
+    //id = _id;
     name = _name;
     station_class = _class;
     address = _address;

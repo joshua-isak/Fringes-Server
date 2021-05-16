@@ -8,12 +8,16 @@ struct Address {
     string star_name;
     int star_id;
     float distance_from_star;
+    //float orbit_position;
     string location;
     float pos_x;
     float pos_y;
 };
 
 class Spaceport {
+public:
+    static int id_counter;      // value of next spaceport id to be issued
+
 private:
     int id;                     // unique spaceport id
     string name;                // spaceport name
@@ -26,7 +30,7 @@ private:
 
 public:
     // Constructor
-    Spaceport(int _id, string _name, int _class, Address _address);
+    Spaceport(string _name, int _class, Address _address);
 
     // Get spaceport id
     int getId();

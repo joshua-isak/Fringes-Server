@@ -19,9 +19,6 @@ Ship::Ship(string _name, string _reg, ship_type _type, int m_w, int m_v, Spacepo
     id = id_counter;
     id_counter += 1;
 
-    // Add ship to map of all ships
-    ships.insert({id, this});
-
     // Set initial variables
     name = _name;
     registration = _reg;
@@ -37,6 +34,9 @@ Ship::Ship(string _name, string _reg, ship_type _type, int m_w, int m_v, Spacepo
     next_spaceport = startport;
     last_spaceport = startport;
     travel_state = DOCKED;
+
+    // Add ship to map of all ships
+    ships.insert({id, this});
 }
 
 
