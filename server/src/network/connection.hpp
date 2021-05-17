@@ -1,5 +1,5 @@
 /*
-Object that mannages an active TCP connection.
+Object that manages an active TCP connection.
 
 Conducts a handshake to get client information (username, version, password)
 and verifies that it is correct. Then syncs game information to the client and
@@ -28,7 +28,7 @@ private:
 
     string last_error;      // description of last error
     string username;        // username of connected client
-    //mutex mtx;              // mutex to lock critical sections of code //--TODO-- make a pointer
+    //mutex mtx;            // mutex to lock critical sections of code //--TODO-- make *mtx cuz operator()
 
 public:
 

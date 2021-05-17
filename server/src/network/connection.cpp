@@ -50,7 +50,7 @@ void Connection::operator()(int _socket_id, struct sockaddr_in address) {
         company_id = new_company->getId();
     }
     else {
-        // Set this connection's company id to an existing one
+        // Set this connection's company_id to an existing one
         company_id = Company::u_to_company[username]->getId();
     }
 
@@ -73,16 +73,16 @@ void Connection::operator()(int _socket_id, struct sockaddr_in address) {
 
         // Read in rest of frame
         char data[f_length];
-        recv(socket_id, &data, f_length, 0);        //--TODO--// THIS REALLY NEEDS ERROR CHECKING, MAKE A READ FUNCTION
+        recv(socket_id, &data, f_length, 0);        //--TODO--// MAKE A READBYTES FUNCTION!!!!
 
-        // Read in command string   //--TODO-- umm what if c_length > buffer size... these need mem protection!
+        // Read in command string           //--TODO--// umm what if c_length > buffer size... these need mem protection!
         int seek = 0;                                   // seek value of data buffer
         int c_length = data[seek];                      // command string length
         string command (&data[seek+1], c_length-1);     // command string (-1 to trim off extra whitespace)
         seek += c_length + 1;
 
         // Handle client command
-        // Switch statements only work with integral types :(((
+        // Switch statements only work with integral types :(
         if (command == "SEND_SHIP") { this->handleShipSend(data, seek); }
 
     }
@@ -123,8 +123,6 @@ int Connection::sendFrame(char data[], int data_size) {
 
     char outbuf [data_size + 2] = {0};
     uint16_t frame_len = data_size;
-
-    //werframe_len = htons(frame_len);           // translate frame length into network byte order
 
     memcpy(outbuf, &frame_len, 2);
     memcpy(outbuf + 2, data, data_size);
@@ -296,7 +294,6 @@ int Connection::syncInstance(int conn_id, string sync_command, string sync_type,
     else {
         return connections[conn_id]->sendFrame(outbuf, sizeof(outbuf));
     }
-
 }
 
 

@@ -1,3 +1,7 @@
+/*
+Instance that represents a spaceport
+*/
+
 #pragma once
 
 #include <string>
@@ -24,7 +28,7 @@ private:
 
     int station_class;          // station level of development
 
-    Address address;           // station location in space
+    Address address;            // station location in space
 
     //map <> cargo              // map containing the station's cargo bulletin
 

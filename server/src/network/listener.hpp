@@ -23,13 +23,13 @@ public:
 
     /*
     Listener constructor
-    Needs an ipv4 address (char array) and port number (integer)
+    Needs an ipv4 address and a port number
     */
     Listener(const char * _ip, int _port);
 
     /*
     Start a listener for new TCP connections (blocking),
-    incoming connections are handled via a new thread (connection operator() ).
+    incoming connections are handled via a new thread (connection operator() )
 
     Returns -1 if there is an error and sets a string describing the error in Listener.last_error
     */

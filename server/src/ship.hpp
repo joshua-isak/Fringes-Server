@@ -1,3 +1,8 @@
+/*
+Instance that represents a ship
+*/
+
+
 #pragma once
 
 #include <time.h>
@@ -38,7 +43,7 @@ private:
 
     float reliability;                  // ship failure rate
 
-    //map <int, Cargo*> cargo;            // map containing ship's current cargo manifest
+    //map <int, Cargo*> cargo;          // map containing ship's current cargo manifest
 
     Spaceport *last_spaceport;          // spaceport ship has departed from
     Spaceport *next_spaceport;          // spaceport ship is travelling to

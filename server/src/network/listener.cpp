@@ -28,13 +28,13 @@ int Listener::startListener() {
     int addrlen = sizeof(address);
     char buffer[1024] = {0};
 
-    // Creating socket file descriptor
+    // Create socket file descriptor
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
         last_error = "listener: failed to create socket";
         return -1;
     }
 
-    // Forcefully attaching socket to the port 8080
+    // Forcefully attach socket to the port
     if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
         last_error = "listener: failed to setsockopt";
         return -1;
@@ -44,7 +44,7 @@ int Listener::startListener() {
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(port);
 
-    // Forcefully attaching socket to the port 8080
+    // Forcefully attach socket to the port
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
         last_error = "listener: socket bind failed";
         return -1;

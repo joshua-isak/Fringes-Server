@@ -1,5 +1,5 @@
 /*
-Object that manages a company, run by a user connection.
+Instance that represents a company, run by a user connection.
 
 Generated when a new username connects, remains tied to that specific username.
 
