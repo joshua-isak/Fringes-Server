@@ -21,7 +21,9 @@ string password = "1234";              // Naive password management approach //-
 
 map <int, Ship*> ships;                // map of all ships (id, pointer)
 map <int, Spaceport*> spaceports;      // map of all spaceports (id, pointer)
-map <int, Connection*> connections;         // map of all active TCP connections
+map <int, Connection*> connections;    // map of all active TCP connections
+map <int, Company*> companies;         // map of all companies (id, pointer)
+//map <string, Company*> Company::u_to_company;   // map of all companies keyed by username
 
 
 // Periodically check if ships have arrived at their destination
@@ -62,7 +64,7 @@ int main(int argc, char *argv[]) {
     cout << "Starting server..." << endl;
 
     // Set debug level for logger
-    Logger::debug_level = 4;
+    Logger::debug_level = 3;
 
     // Initialize Spaceports
     Address new_address_1 = {"Sol", 1, 100, "some_string", 0, 0};
@@ -93,27 +95,36 @@ int main(int argc, char *argv[]) {
     Address new_address_9 = {"Betelgeuse", 2, 100, "some_string", -3, 2};
     Spaceport *port_9 = new Spaceport("Betelgeuse Station", 1, new_address_9);
 
+    Address new_address_10 = {"Sirius", 2, 100, "some_string", 3, 2.3};
+    Spaceport *port_10 = new Spaceport("Sirius XM", 1, new_address_10);
+
+    Address new_address_11 = {"Yildun", 2, 100, "some_string", -4, 0.7};
+    Spaceport *port_11 = new Spaceport("Yildun VII", 1, new_address_11);
+
+    Address new_address_12 = {"Mizar", 2, 100, "some_string", 1.3, 2.5};
+    Spaceport *port_12 = new Spaceport("Mizar Battle-Station", 1, new_address_12);
+
 
     // Initialize ships
-    Ship *ship_1 = new Ship("Enterprise", "NCC-1701", SMALL, 16, 16, port_1);
-    Ship *ship_2 = new Ship("Kelvin", "NCC-0514", MEDIUM, 16, 16, port_2);
-    Ship *ship_3 = new Ship("Autumn", "NCC-4196", MEDIUM, 16, 16, port_3);
-    Ship *ship_4 = new Ship("Orville", "NCC-789", MEDIUM, 16, 16, port_4);
-    Ship *ship_5 = new Ship("Serenity", "FF-055", MEDIUM, 16, 16, port_5);
-    Ship *ship_6 = new Ship("Aquaria", "NMS-1444", MEDIUM, 16, 16, port_5);
-    Ship *ship_7 = new Ship("Mantra", "SCS 1273", MEDIUM, 16, 16, port_5);
-    Ship *ship_8 = new Ship("Pariah", "NMS-1821", MEDIUM, 16, 16, port_5);
-    Ship *ship_9 = new Ship("Bohr", "NCC-3435", MEDIUM, 16, 16, port_5);
+    // Ship *ship_1 = new Ship("Enterprise", "NCC-1701", SMALL, 16, 16, port_1);
+    // Ship *ship_2 = new Ship("Kelvin", "NCC-0514", MEDIUM, 16, 16, port_2);
+    // Ship *ship_3 = new Ship("Autumn", "NCC-4196", MEDIUM, 16, 16, port_3);
+    // Ship *ship_4 = new Ship("Orville", "NCC-789", MEDIUM, 16, 16, port_4);
+    // Ship *ship_5 = new Ship("Serenity", "FF-055", MEDIUM, 16, 16, port_5);
+    // Ship *ship_6 = new Ship("Aquaria", "NMS-1444", MEDIUM, 16, 16, port_5);
+    // Ship *ship_7 = new Ship("Mantra", "SCS 1273", MEDIUM, 16, 16, port_5);
+    // Ship *ship_8 = new Ship("Pariah", "NMS-1821", MEDIUM, 16, 16, port_5);
+    // Ship *ship_9 = new Ship("Bohr", "NCC-3435", MEDIUM, 16, 16, port_5);
 
 
 
     // Launch thread to check ship progress
     thread t1(checkShipProgress, &ships);
 
-    ship_1->depart(port_3);
-    ship_2->depart(port_1);
-    ship_3->depart(port_5);
-    ship_4->depart(port_5);
+    // ship_1->depart(port_3);
+    // ship_2->depart(port_1);
+    // ship_3->depart(port_5);
+    // ship_4->depart(port_5);
 
 
     // Set up TCP listener

@@ -24,6 +24,8 @@ private:
     string readable_ip;     // human readable representation of ipv4 address
     int addr_port;          // human readable representation of port number
     int socket_id;          // file descriptor for this socket
+    int company_id;         // id of this connection's company
+
     string last_error;      // description of last error
     string username;        // username of connected client
     //mutex mtx;              // mutex to lock critical sections of code //--TODO-- make a pointer
@@ -51,11 +53,11 @@ public:
     // sendFrame to all active connections, returns -1 for error
     static int sendFrameAll(char data[], int data_size);
 
-    // send json data and a sync value for a single ship to conn_id (conn_id 0 to send to all connections)
-    static int syncShip(int conn_id, string sync_type, string json_data);
+    // send json data and a sync value for a sync_command to conn_id (conn_id 0 to send to all connections)
+    static int syncInstance(int conn_id, string sync_command, string sync_type, string json_data);
 
     // send json data and a sync value for a single station to conn_id (conn_id 0 to send to all connections)
-    static int syncStation(int conn_id, string sync_type, string json_data);
+    //static int syncStation(int conn_id, string sync_type, string json_data);
 
     // depart a ship to a destination station, takes data to read from and current seek of that data
     int handleShipSend(char data[], int seek);

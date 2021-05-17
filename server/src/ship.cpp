@@ -20,6 +20,7 @@ Ship::Ship(string _name, string _reg, ship_type _type, int m_w, int m_v, Spacepo
     id_counter += 1;
 
     // Set initial variables
+    company_id = 0;
     name = _name;
     registration = _reg;
     type = _type;
@@ -37,6 +38,12 @@ Ship::Ship(string _name, string _reg, ship_type _type, int m_w, int m_v, Spacepo
 
     // Add ship to map of all ships
     ships.insert({id, this});
+
+    // Log ship creation
+    Logger::log_message("New ship created: " + registration, 0, Logger::CYAN);
+
+    // Tell all clients this ship has been created
+    Connection::syncInstance(0, "SYNC_SHIP", "INITIAL", this->getJsonString());
 }
 
 
@@ -62,6 +69,32 @@ ship_state Ship::getState() {
 
 int Ship::getId() {
     return id;
+}
+
+
+int Ship::getCompanyId() {
+    return company_id;
+}
+
+
+int Ship::changeCompany(int new_company_id) {
+
+    mtx.lock();
+
+    // Make sure this ship is docked
+    if (travel_state != DOCKED) {
+        last_error = registration + " must be docked to change ownership!";
+        return -1;
+    }
+
+    //--TODO--// Make sure this ship has no cargo
+
+    // Change owning company
+    company_id = new_company_id;
+
+    mtx.unlock();
+
+    return 0;
 }
 
 
@@ -105,7 +138,7 @@ int Ship::depart(Spaceport *destination) {
     Logger::log_message(output, 0, "");
 
     // Tell all clients this ship has departed
-    Connection::syncShip(0, "DEPART", this->getJsonString());
+    Connection::syncInstance(0, "SYNC_SHIP", "DEPART", this->getJsonString());
 
     return 0;   // return the success state
 }
@@ -127,7 +160,7 @@ void Ship::arrive() {
     Logger::log_message(output, 0, "");
 
     // Tell all clients this ship has arrived
-    Connection::syncShip(0, "ARRIVE", this->getJsonString());
+    Connection::syncInstance(0, "SYNC_SHIP", "ARRIVE", this->getJsonString());
 
 }
 
@@ -145,6 +178,7 @@ string Ship::getJsonString() {
     json x;
 
     x["id"] = id;
+    x["company_id"] = company_id;
     x["name"] = name;
     x["registration"] = registration;
     x["type"] = type;

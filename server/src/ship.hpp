@@ -26,6 +26,7 @@ public:
 private:
 
     int id;                             // unique ship id
+    int company_id;                     // id of owning company
     string name;                        // ship name
     string registration;                // unique registration number
     ship_type type;                     // ship class
@@ -53,7 +54,7 @@ private:
 
 public:
     // Constructor
-    Ship(string _name, string _reg, ship_type _type, int m_w, int m_v, Spaceport *startport);
+    Ship(string _name, string _reg, ship_type _type, int max_w, int max_v, Spaceport *startport);
 
     // Send the ship off to the destination spaceport
     int depart(Spaceport *destination);
@@ -79,8 +80,14 @@ public:
     // Get ship id
     int getId();
 
+    // Get ship's company id
+    int getCompanyId();
+
     // Get ship travel state
     ship_state getState();
+
+    // Change ownership of ship
+    int changeCompany(int new_company_id);
 
     // Return all ship information as a json string
     string getJsonString();

@@ -1,6 +1,6 @@
 CC = g++ -g -I. -pthread
 CPPFLAGS = -g -I.
-OBJS = main.o ship.o spaceport.o listener.o connection.o logger.o
+OBJS = main.o ship.o spaceport.o listener.o connection.o logger.o company.o
 PROGS = run.exe
 
 default: build
@@ -25,6 +25,9 @@ connection.o:
 
 logger.o:
 	$(CC) -c server/src/logger.cpp -o logger.o
+
+company.o:
+	$(CC) -c server/src/company.cpp -o company.o
 
 clean:
 	rm *.o

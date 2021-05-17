@@ -30,17 +30,35 @@ void Connection::operator()(int _socket_id, struct sockaddr_in address) {
     }
 
     // Sync data for all spaceports
-    map<int, Spaceport*>::iterator itt;
-    for (itt = spaceports.begin(); itt != spaceports.end(); itt++) {
-        Spaceport *this_spaceport = itt->second;
-        Connection::syncStation(socket_id, "INITIAL", this_spaceport->getJsonString());
+    map<int, Spaceport*>::iterator ix;
+    for (ix = spaceports.begin(); ix != spaceports.end(); ix++) {
+        Spaceport *this_spaceport = ix->second;
+        Connection::syncInstance(socket_id, "SYNC_STATION", "INITIAL", this_spaceport->getJsonString());
     }
 
     // Sync data for all ships
-    map<int, Ship*>::iterator it;
-    for (it = ships.begin(); it != ships.end(); it++) {
-        Ship *this_ship = it->second;
-        Connection::syncShip(socket_id, "INITIAL", this_ship->getJsonString());
+    map<int, Ship*>::iterator iy;
+    for (iy = ships.begin(); iy != ships.end(); iy++) {
+        Ship *this_ship = iy->second;
+        Connection::syncInstance(socket_id, "SYNC_SHIP", "INITIAL", this_ship->getJsonString());
+    }
+
+    // Check if we need to generate a new company for this user
+    if (Company::u_to_company.find(username) == Company::u_to_company.end()) {
+        // Generate new company for this user
+        Company *new_company = new Company("Unnamed_company", username);
+        company_id = new_company->getId();
+    }
+    else {
+        // Set this connection's company id to an existing one
+        company_id = Company::u_to_company[username]->getId();
+    }
+
+    // Sync data for all companies
+    map<int, Company*>::iterator iz;
+    for (iz = companies.begin(); iz != companies.end(); iz++) {
+        Company *this_company = iz->second;
+        Connection::syncInstance(socket_id, "SYNC_COMPANY", "INITIAL", this_company->getJsonString());
     }
 
     while (true) {
@@ -95,7 +113,7 @@ int Connection::send(char data[], int data_size) {
     int err = ::send(socket_id, data, data_size, 0);
     //mtx.unlock();
 
-    Logger::log_message("sent packet to " + this->username, 3, Logger::CYAN);
+    Logger::log_message("sent packet to " + this->username, 4, Logger::CYAN);
 
     return err;
 }
@@ -163,9 +181,6 @@ int Connection::doHandshake() {
         return -1;
     }
 
-    // Translate frame length from network byte order
-    //f_length = be16toh(f_length);
-
     // Read in rest of frame
     char data[f_length];
     if (recv(socket_id, &data, f_length, 0) < 1) {
@@ -195,13 +210,36 @@ int Connection::doHandshake() {
 
     // Check if client sent the HELLO command
     string hello = "HELLO";
-    if (command != "HELLO") { last_error = "connection: malformed client HELLO"; return -1; }
+    if (command != "HELLO") {
+        last_error = "connection: malformed client HELLO";
+        this->sendError("Malformed HELLO message");
+        return -1;
+    }
 
     // Make sure client version is compatible
-    if (version != version) { last_error = "connection: client version incompatible"; return -1; }
+    if (version != version) {
+        last_error = "connection: client version incompatible";
+        this->sendError("Client version incompatible");
+        return -1;
+    }
 
     // Verify password
-    if (_password != password) { last_error = "connection: client password incorrect"; return -1; }
+    if (_password != password) {
+        last_error = "connection: client password incorrect";
+        this->sendError("Server password incorrect");
+        return -1;
+    }
+
+    // Make sure a client with this username is not already connected
+     map<int, Connection*>::iterator it;
+    for (it = connections.begin(); it != connections.end(); it++) {
+        Connection *conn = it->second;
+        if (username == conn->username ) {
+            last_error = "connection: client with this username already connected!";
+            this->sendError("User with your name already connected!");
+            return -1;
+        }
+    }
 
     // Send WELCOME to client
     string w_command = "WELCOME";
@@ -227,44 +265,9 @@ int Connection::doHandshake() {
 }
 
 
-int Connection::syncShip(int conn_id, string sync_type, string json_data) {
+int Connection::syncInstance(int conn_id, string sync_command, string sync_type, string json_data) {
 
-    string command = "SYNC_SHIP";
-
-    uint8_t command_len = command.length() + 1;             // +1 to include string null terminator
-    uint8_t sync_type_len = sync_type.length() + 1;
-    uint16_t json_len = json_data.length() + 1;
-
-    char outbuf [command_len + sync_type_len + json_len + 4];   // buffer of packet data
-    int seek = 0;                                               // current buffer seek
-
-    // Write command data to buffer
-    Connection::writeCommand(outbuf, command, &seek);
-
-    // Write sync_type data to buffer (sub command)
-    Connection::writeCommand(outbuf, sync_type, &seek);
-
-    // Write json_data to buffer
-    memcpy(outbuf + seek, &json_len, 2);                        // 2 because uint16's are 2 bytes long
-    seek += 2;
-    strcpy(outbuf + seek, json_data.c_str());//, json_len);
-
-    // Send this to all clients if conn_id is zero
-    if (conn_id == 0) {
-        return sendFrameAll(outbuf, sizeof(outbuf));
-    }
-
-    // Send it to connection conn_id if specified
-    else {
-        return connections[conn_id]->sendFrame(outbuf, sizeof(outbuf));
-    }
-
-}
-
-
-int Connection::syncStation(int conn_id, string sync_type, string json_data) {
-
-    string command = "SYNC_STATION";
+    string command = sync_command;
 
     uint8_t command_len = command.length() + 1;             // +1 to include string null terminator
     uint8_t sync_type_len = sync_type.length() + 1;
@@ -320,8 +323,15 @@ int Connection::handleShipSend(char data[], int seek) {
         return -1;
     }
 
-    // Attempt to send the ship to the destination spaceport, print any errors
+    // Check if this ship belongs to this user's company
     Ship *this_ship = ships[ship_id];
+    if (this_ship->getCompanyId() != company_id) {
+        Logger::log_message("connection: send_ship: client tried to send a ship that isn't theirs!", 0, Logger::RED);
+        this->sendError("this ship does not belong to your company!");
+        return -1;
+    }
+
+    // Attempt to send the ship to the destination spaceport, print any errors
     Spaceport *that_spaceport = spaceports[dest_id];
     if (this_ship->depart(that_spaceport) < 0) {
         Logger::log_message("connection: send_ship: " + this_ship->last_error, 0, Logger::RED);
@@ -355,9 +365,7 @@ int Connection::sendError(string error_message) {
     strcpy(outbuf + seek, error_message.c_str());           // write in error_message
 
     // Send the packet to the client
-    this->sendFrame(outbuf, sizeof(outbuf));
-
-    return 0;       // return success
+    return this->sendFrame(outbuf, sizeof(outbuf));
 }
 
 
