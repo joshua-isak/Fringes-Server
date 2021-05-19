@@ -29,6 +29,20 @@ void Connection::operator()(int _socket_id, struct sockaddr_in address) {
         return;
     }
 
+    // Sync data for all Stars
+    map<int, Star*>::iterator is;
+    for (is = stars.begin(); is != stars.end(); is++) {
+        Star *this_star = is->second;
+        Connection::syncInstance(socket_id, "SYNC_STAR", "INITIAL", this_star->getJsonString());
+    }
+
+    // Sync data for all Planets
+    map<int, Planet*>::iterator ip;
+    for (ip = planets.begin(); ip != planets.end(); ip++) {
+        Planet *this_planet = ip->second;
+        Connection::syncInstance(socket_id, "SYNC_PLANET", "INITIAL", this_planet->getJsonString());
+    }
+
     // Sync data for all spaceports
     map<int, Spaceport*>::iterator ix;
     for (ix = spaceports.begin(); ix != spaceports.end(); ix++) {
@@ -84,6 +98,8 @@ void Connection::operator()(int _socket_id, struct sockaddr_in address) {
         // Handle client command
         // Switch statements only work with integral types :(
         if (command == "SEND_SHIP") { this->handleShipSend(data, seek); }
+
+        if (command == "RENAME") { this->handleRename(data, seek); }
 
     }
 }
@@ -299,11 +315,11 @@ int Connection::syncInstance(int conn_id, string sync_command, string sync_type,
 
 int Connection::handleShipSend(char data[], int seek) {
 
-    // Read in ship id
+    // Read in ship id      //--TODO--// Change to handle uint16s
     int ship_id = data[seek];
     seek += 2;
 
-    // Read in destination station id
+    // Read in destination station id       //--TODO--// Change to handle uint16s
     int dest_id = data[seek];
 
     // Check if the shipID is valid
@@ -328,7 +344,7 @@ int Connection::handleShipSend(char data[], int seek) {
         return -1;
     }
 
-    // Attempt to send the ship to the destination spaceport, print any errors
+    // Attempt to send the ship to the destination spaceport, return fail if any errors
     Spaceport *that_spaceport = spaceports[dest_id];
     if (this_ship->depart(that_spaceport) < 0) {
         Logger::log_message("connection: send_ship: " + this_ship->last_error, 0, Logger::RED);
@@ -337,6 +353,53 @@ int Connection::handleShipSend(char data[], int seek) {
     }
 
     return 0;   // return success
+}
+
+
+int Connection::handleRename(char data[], int seek) {
+
+    // Read in sub command string
+    int c_length = data[seek];                      // command string length
+    string command (&data[seek+1], c_length-1);     // command string (-1 to trim off extra whitespace)
+    seek += c_length + 1;
+
+    // Read in new name
+    int n_length = data[seek];
+    string new_name (&data[seek+1], n_length-1);
+    seek += n_length + 1;
+
+    // Read in instance id
+    uint16_t instance_id;
+    memcpy(&instance_id, data + seek, 2);
+
+    // Rename a ship
+    if (command == "SHIP") {
+
+        // Check if the shipID is valid
+        if (ships.find((int)instance_id) == ships.end()) {
+            Logger::log_message("connection: rename_ship: client sent bad ship_id", 0, Logger::RED);
+            this->sendError("ship id invalid!");
+            return -1;
+        }
+
+        // Check if this ship belongs to this user's company
+        Ship *this_ship = ships[(int)instance_id];
+        if (this_ship->getCompanyId() != company_id) {
+            Logger::log_message("connection: rename_ship: client tried to rename a ship that isn't theirs!", 0, Logger::RED);
+            this->sendError("this ship does not belong to your company!");
+            return -1;
+        }
+
+        // Rename the ship
+        this_ship->rename(new_name);
+    }
+
+    // Rename a company
+    else if (command == "COMPANY") {
+
+    }
+
+    return -1;
 }
 
 

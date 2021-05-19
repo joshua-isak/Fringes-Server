@@ -48,7 +48,18 @@ Ship::Ship(string _name, string _reg, ship_type _type, int m_w, int m_v, Spacepo
 
 
 int Ship::rename(string new_name) {
+
+    mtx.lock();
+    string old_name = name;     // store old name to write into console
     name = new_name;
+    mtx.unlock();
+
+    // Log name change in console
+    Logger::log_message(registration + " " + old_name + " changed name to " + new_name, 1, "");
+
+    // Tell all clients about name change
+    Connection::syncInstance(0, "SYNC_SHIP", "RENAME", this->getJsonString());
+
     return 0;
 }
 
@@ -182,9 +193,9 @@ string Ship::getJsonString() {
     x["name"] = name;
     x["registration"] = registration;
     x["type"] = type;
-    x["max_weight"] = max_weight;
-    x["max_volume"] = max_volume;
-    x["total_warps"] = total_warps;
+    // x["max_weight"] = max_weight;
+    // x["max_volume"] = max_volume;
+    x["warps"] = total_warps;
     x["reliability"] = reliability;
     // cargo manifest
     x["last_spaceport"] = last_spaceport->getId();

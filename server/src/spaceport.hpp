@@ -1,40 +1,60 @@
 /*
 Instance that represents a spaceport
+
+Spaceports are attached to planets which are attached to stars
 */
 
 #pragma once
 
 #include <string>
+#include <map>
+#include <mutex>
+
+#include "server/src/globals.hpp"
+
+// Forward declare these classes to make the compiler happy...
+class Star;
+class Planet;
+class Ship;
 
 using namespace std;
 
+
 struct Address {
-    string star_name;
     int star_id;
-    float distance_from_star;
-    //float orbit_position;
-    string location;
-    float pos_x;
-    float pos_y;
+    int planet_id;
+
+    float star_x;           // starmap x coord of station
+    float star_y;           // starmap y coord of station
+
+    float orb_radius;       // orbit radius of planet around star
+    float orb_degrees;      // orbit degree
 };
+
 
 class Spaceport {
 public:
-    static int id_counter;      // value of next spaceport id to be issued
+    static int id_counter;              // value of next spaceport id to be issued
 
 private:
-    int id;                     // unique spaceport id
-    string name;                // spaceport name
+    int id;                             // unique spaceport id
+    string name;                        // spaceport name
 
-    int station_class;          // station level of development
+    int station_class;                  // station level of development
 
-    Address address;            // station location in space
+    Address address;                    // station location in space
 
-    //map <> cargo              // map containing the station's cargo bulletin
+    Star *star;                         // pointer to star this spaceport is around
+    Planet *planet;                     // pointer to planet this spaceport is around
+
+    map <int, Ship*> docked_ships;      // map of all ships currently docked at this station
+    //map <> cargo                      // map containing the station's cargo bulletin
+
+    mutex mtx;
 
 public:
     // Constructor
-    Spaceport(string _name, int _class, Address _address);
+    Spaceport(string _name, int _class, Address _address, Star *mystar, Planet *myplanet);
 
     // Get spaceport id
     int getId();
@@ -48,6 +68,6 @@ public:
     // Get all spaceport information as a json string
     string getJsonString();
 
-    // Return the distance between this spaceport and the provided one
+    // Return the distance between this spaceport and the provided one (interstellar or intrastellar)
     float getDistance(Spaceport *b);
 };
