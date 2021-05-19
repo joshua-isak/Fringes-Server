@@ -60,6 +60,7 @@ string Spaceport::getJsonString() {
     x["station_class"] = station_class;
     //x["address"]["star_name"] = address.star_name;
     x["address"]["star_id"] = address.star_id;
+    x["address"]["planet_id"] = address.planet_id;
     x["address"]["orb_radius"] = address.orb_radius;
     x["address"]["orb_degrees"] = address.orb_degrees;
     x["address"]["star_x"] = address.star_x;

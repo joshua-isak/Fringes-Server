@@ -70,57 +70,25 @@ int main(int argc, char *argv[]) {
     // Initialize Stars, planets and spaceports
     Star *star1 = new Star("Sol", yellow, 0, 0);
     Star *star2 = new Star("Alpha Centauri", yellow, 2, 2);
+    Star *star3 = new Star("Durandal", yellow, -0.8, -2.5);
 
-    Planet *planet1 = star1->addPlanet("Earth", 2, 0);
-    Planet *planet2 = star1->addPlanet("Mars", 3, 30);
+    Planet *mercury = star1->addPlanet("Mercury", 1, 200);
+    Planet *venus = star1->addPlanet("Venus", 1.6, 80);
+    Planet *planet1 = star1->addPlanet("Earth", 2, 310);
+    Planet *planet2 = star1->addPlanet("Mars", 2.4, 30);
 
     Planet *planet3 = star2->addPlanet("Alpha Centauri I", 1, 30);
     Planet *planet4 = star2->addPlanet("Alpha Centauri II", 1.5, 90);
     Planet *planet5 = star2->addPlanet("Alpha Centauri III", 3, 180);
 
+    Planet *planet6 = star3->addPlanet("Durandal II", 3, 60);
+    Planet *planet7 = star3->addPlanet("Reach", 1.5, 200);
+
     planet1->addSpaceport("Terra Station", 1);
     planet2->addSpaceport("Mars Station", 1);
-
-    planet5->addSpaceport("Alpha Centauri III Station", 1);
-
-
-
-    // Initialize Spaceports
-    // Address new_address_1 = {"Sol", 1, 100, "some_string", 0, 0};
-    // Spaceport *port_1 = new Spaceport("Terra Station", 1, new_address_1);
-
-    // Address new_address_2 = {"Alpha Centauri", 2, 100, "some_string", 1, 1};
-    // Spaceport *port_2 = new Spaceport("Alpha Centauri II", 1, new_address_2);
-
-    // Address new_address_3 = {"Polaris", 2, 100, "some_string", 2.5, -0.4};
-    // Spaceport *port_3 = new Spaceport("Polaris V", 1, new_address_3);
-
-    // Address new_address_4 = {"Proxima Centauri", 2, 100, "some_string", 2, -2};
-    // Spaceport *port_4 = new Spaceport("Proxima Centauri I", 1, new_address_4);
-
-    // Address new_address_5 = {"Durandal", 2, 100, "some_string", -1.8, -2};
-    // Spaceport *port_5 = new Spaceport("Durandal III", 1, new_address_5);
-
-    // Address new_address_6 = {"Altair", 2, 100, "some_string", -2.8, -0.3};
-    // Spaceport *port_6 = new Spaceport("Altair I", 1, new_address_6);
-
-    // Address new_address_7 = {"Deneb", 2, 100, "some_string", -1.3, -3};
-    // Spaceport *port_7 = new Spaceport("Deneb IV", 1, new_address_7);
-
-    // Address new_address_8 = {"Vega", 2, 100, "some_string", -0.5, 2.5};
-    // Spaceport *port_8 = new Spaceport("Vega Prime", 1, new_address_8);
-
-    // Address new_address_9 = {"Betelgeuse", 2, 100, "some_string", -3, 2};
-    // Spaceport *port_9 = new Spaceport("Betelgeuse Station", 1, new_address_9);
-
-    // Address new_address_10 = {"Sirius", 2, 100, "some_string", 3, 2.3};
-    // Spaceport *port_10 = new Spaceport("Sirius XM", 1, new_address_10);
-
-    // Address new_address_11 = {"Yildun", 2, 100, "some_string", -4, 0.7};
-    // Spaceport *port_11 = new Spaceport("Yildun VII", 1, new_address_11);
-
-    // Address new_address_12 = {"Mizar", 2, 100, "some_string", 1.3, 2.5};
-    // Spaceport *port_12 = new Spaceport("Mizar Battle-Station", 1, new_address_12);
+    planet4->addSpaceport("Alpha Centauri II", 1);
+    planet7->addSpaceport("Reach Station", 1);
+    venus->addSpaceport("Venus Station", 1);
 
 
     // Launch thread to check ship progress
