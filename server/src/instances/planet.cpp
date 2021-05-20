@@ -24,6 +24,7 @@ Planet::Planet(string _name, int _star_id, float orb_rad, float orb_deg) {
 
     orbit_radius = orb_rad;
     orbit_degree = orb_deg;
+    orbit_speed = getPlanetOrbitSpeed();
 
     // Add this planet to map of all planets
     planets.insert({id, this});
@@ -48,6 +49,33 @@ Spaceport* Planet::addSpaceport(string s_name, int _class) {
     spaceport_id = new_port->getId();
 
     return new_port;
+}
+
+
+void Planet::updatePlanetOrbits() {
+
+    mtx.lock();
+    orbit_degree = orbit_degree + orbit_speed;
+    if (orbit_degree > 360) {
+        orbit_degree = orbit_degree - 360;
+    }
+
+    json data;
+
+    data["id"] = id;;
+    data["orb_degree"] = orbit_degree;
+
+    Connection::syncInstance(0, "SYNC_PLANET", "ORBIT_UPDATE", data.dump());
+
+    mtx.unlock();
+}
+
+
+float Planet::getPlanetOrbitSpeed() {
+    // orbit_speed is a function of 1/radius^2 * a configurable planet tick speed
+    orbit_speed = (float) (1/(pow(orbit_radius, 2)))*planet_tick_speed;
+
+    return orbit_speed;
 }
 
 
