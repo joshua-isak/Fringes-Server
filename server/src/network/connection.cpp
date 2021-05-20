@@ -205,7 +205,7 @@ int Connection::doHandshake() {
     // Read in command string   //--TODO-- umm what if c_length > buffer size... these need mem protection!
     int seek = 0;                                   // seek value of data buffer
     int c_length = data[seek];                      // command string length
-    string command (&data[seek+1], c_length-1);     // command string (-1 to trim off extra whitespace)
+    string command (&data[seek+1], 5);//c_length-1);     // command string (-1 to trim off extra whitespace)
 
     // Read in version string
     seek += c_length + 1;

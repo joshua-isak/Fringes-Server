@@ -43,7 +43,7 @@ void update() {
 
         // Update the orbit degree of all planets every minute
         if (current_time == next_update_time) {
-            Logger::log_message("Updated all planet orbits", 1, Logger::CYAN);
+            Logger::log_message("Updated all planet orbits", 2, Logger::CYAN);
             for(ip = planets.begin(); ip != planets.end(); ip++) {
                 Planet *this_planet = ip->second;
                 this_planet->updatePlanetOrbits();
