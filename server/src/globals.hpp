@@ -14,6 +14,7 @@
 using namespace std;
 
 extern string password;                     // password clients need in order to connect to the server
+extern int planet_tick_speed;               // Magic Number for Planet speeds
 
 extern map <int, Ship*> ships;              // map of all ships (id, pointer)
 extern map <int, Spaceport*> spaceports;    // map of all spaceports (id, pointer)

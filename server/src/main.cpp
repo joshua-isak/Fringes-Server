@@ -18,6 +18,7 @@ int MAX_CLIENTS = 10;                // maximum number of client connections //-
 
 // Global Variable Declarations
 string password = "1234";              // Naive password management approach //--TODO--// NO PLAINTEXT PWDS
+int planet_tick_speed = 4;
 
 map <int, Ship*> ships;                // map of all ships (id, pointer)
 map <int, Spaceport*> spaceports;      // map of all spaceports (id, pointer)
@@ -28,18 +29,28 @@ map <int, Star*> stars;              // map of all stars
 
 
 // Periodically check if ships have arrived at their destination
-void checkShipProgress(std::map <int, Ship*> *ships) {
+void update() {
 
     map<int, Ship*>::iterator it;
+    map<int, Planets*>::iterator ip;
     time_t current_time;
+    time_t next_update_time = time(NULL);
 
     while (true) {
 
         // Get the current UNIX timestamp
         current_time = time(NULL);
 
+        if (current_time = next_update_time) {
+            for(ip planets.begin(); ip != planets.end(); ip++) {
+                Planet *this_planet = ip->second;
+                this_planet->updatePlanetOrbits();
+            }
+            next_update_time += 60;
+        }
+
         // Loop through all warping ships and check if their arrival time has passed, call arrive() if so
-        for (it = ships->begin(); it != ships->end(); it++) {
+        for (it = ships.begin(); it != ships.end(); it++) {
 
             Ship *this_ship = it->second;
 
