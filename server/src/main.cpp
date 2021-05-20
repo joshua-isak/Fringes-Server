@@ -69,26 +69,94 @@ int main(int argc, char *argv[]) {
 
     // Initialize Stars, planets and spaceports
     Star *star1 = new Star("Sol", yellow, 0, 0);
-    Star *star2 = new Star("Alpha Centauri", yellow, 2, 2);
-    Star *star3 = new Star("Durandal", yellow, -0.8, -2.5);
+    Star *star2 = new Star("Alpha Centauri", yellow, 0.6, -2.1);
+    Star *star3 = new Star("Polaris", yellow, -0.4, 2.4);
+    Star *star4 = new Star("Proxima Centauri", yellow, 0.8, -1.3);
+    Star *star5 = new Star("Durandal", yellow, 2.2, 2.9);
+    Star *star6 = new Star("Altair", yellow, -3.1, 1.4);
+    Star *star7 = new Star("Deneb", yellow, -2.8, -3);
+    Star *star8 = new Star("Vega", yellow, -4.3, -1.1);
+    Star *star9 = new Star("Betelgeuse", yellow, 3.5, 1.5);
+    Star *star10 = new Star("Sirius", yellow, 1.9, 1.9);
+    Star *star11 = new Star("Yildun", yellow, 3.8, -2.8);
+    Star *star12 = new Star("Mizar", yellow, 2.8, -0.3);
 
-    Planet *mercury = star1->addPlanet("Mercury", 1, 200);
-    Planet *venus = star1->addPlanet("Venus", 1.6, 80);
-    Planet *planet1 = star1->addPlanet("Earth", 2, 310);
-    Planet *planet2 = star1->addPlanet("Mars", 2.4, 30);
+    Planet *p1 = star1->addPlanet("Mercury", 1, 200);
+    Planet *p2 = star1->addPlanet("Venus", 1.6, 80);
+    Planet *p3 = star1->addPlanet("Earth", 2, 310);
+    Planet *p4 = star1->addPlanet("Mars", 2.4, 30);
+    Planet *p5 = star1->addPlanet("Jupiter", 3.7, 65);
+    Planet *p6 = star1->addPlanet("Saturn", 4.9, 120);
+    Planet *p7 = star1->addPlanet("Uranus", 5.4, 0);
+    Planet *p8 = star1->addPlanet("Neptune", 6, 260);
 
-    Planet *planet3 = star2->addPlanet("Alpha Centauri I", 1, 30);
-    Planet *planet4 = star2->addPlanet("Alpha Centauri II", 1.5, 90);
-    Planet *planet5 = star2->addPlanet("Alpha Centauri III", 3, 180);
+    p2->addSpaceport("Gaia Station", 1);
+    p3->addSpaceport("Terra Station", 1);
+    p4->addSpaceport("Ares Stellar Gate", 1);
+    p5->addSpaceport("Colony of Europa", 1);
+    p6->addSpaceport("Titan Forges", 1);
+    p8->addSpaceport("The Bastion", 1);
 
-    Planet *planet6 = star3->addPlanet("Durandal II", 3, 60);
-    Planet *planet7 = star3->addPlanet("Reach", 1.5, 200);
+    Planet *p9 = star2->addPlanet("Alpha Centauri I", 0.6, 20);
+    Planet *p10 = star2->addPlanet("Haven", 1.9, 90);
+    Planet *p11 = star2->addPlanet("Alpha Centauri III", 3.4, 350);
 
-    planet1->addSpaceport("Terra Station", 1);
-    planet2->addSpaceport("Mars Station", 1);
-    planet4->addSpaceport("Alpha Centauri II", 1);
-    planet7->addSpaceport("Reach Station", 1);
-    venus->addSpaceport("Venus Station", 1);
+    p10->addSpaceport("Shelter Station", 1);
+
+    Planet *p12 = star3->addPlanet("Polaris I", 0.7, 270);
+    Planet *p13 = star3->addPlanet("Polaris II", 1.2, 255);
+    Planet *p14 = star3->addPlanet("Ursa", 2.2, 135);
+
+    p14->addSpaceport("Boreal Station", 1);
+
+    Planet *p15 = star4->addPlanet("Proxima Centauri I", 1.1, 355);
+    Planet *p16 = star4->addPlanet("Proxima Centauri II", 2.7, 40);
+
+    p16->addSpaceport("Centauri Exchange", 1);
+
+    Planet *p17 = star5->addPlanet("Reach", 2, 190);
+    Planet *p18 = star5->addPlanet("Durandal II", 3.1, 15);
+
+    p17->addSpaceport("Reach Colony", 1);
+    p18->addSpaceport("Reach Forward Outpost", 1);
+
+    Planet *p19 = star6->addPlanet("Altair I", 2.2, 55);
+    Planet *p20 = star6->addPlanet("Altair II", 3.2, 145);
+
+    p19->addSpaceport("Aquila Citadel", 1);
+
+    Planet *p21 = star7->addPlanet("Deneb Prime", 2, 190);
+
+    p21->addSpaceport("Crux Shipyards", 1);
+
+    Planet *p22 = star8->addPlanet("Vega I", 0.5, 65);
+    Planet *p23 = star8->addPlanet("Vega II", 1.2, 175);
+    Planet *p24 = star8->addPlanet("Meridian", 2, 210);
+
+    p23->addSpaceport("Meridian Depot", 1);
+    p24->addSpaceport("Meridian Colony", 1);
+
+    Planet *p25 = star9->addPlanet("Betelgeuse I", 0.5, 100);
+    Planet *p26 = star9->addPlanet("Betelgeuse II", 3.5, 140);
+
+    p26->addSpaceport("Blacksite-7", 1);
+
+    Planet *p27 = star10->addPlanet("Sirius I", 1.3, 100);
+    Planet *p28 = star10->addPlanet("Sirius II", 2.6, 305);
+
+    p28->addSpaceport("Sahavanor Corp.", 1);
+
+    Planet *p29 = star11->addPlanet("Yildun I", 1.5, 120);
+    Planet *p30 = star11->addPlanet("Sierra", 2.1, 150);
+    Planet *p31 = star11->addPlanet("Sirius III", 2.8, 260);
+
+    p30->addSpaceport("Riviera Outpost", 1);
+
+    Planet *p32 = star12->addPlanet("Mizar Prime", 1.9, 250);
+
+    p32->addSpaceport("Antonia Station", 1);
+
+
 
 
     // Launch thread to check ship progress
