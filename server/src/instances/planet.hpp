@@ -32,9 +32,6 @@ private:
     float orbit_degree;                 // degree along orbit (0-360)
     float orbit_speed;                  // Speed of Orbit
 
-    // Update the Planet orbits
-    float updatePlanetOrbits();
-
     mutex mtx;
 
 public:
@@ -50,11 +47,15 @@ public:
     // Get address of planet (to be set as spaceport address)
     //int getAddress();
 
-    
+    //
+    float getPlanetOrbitSpeed();
+
+    // Update the Planet orbits
+    void updatePlanetOrbits();
 
     // Get all planet information at a json string
     string getJsonString();
 
-    
+
 
 };

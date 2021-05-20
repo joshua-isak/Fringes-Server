@@ -51,8 +51,8 @@ Spaceport* Planet::addSpaceport(string s_name, int _class) {
     return new_port;
 }
 
-void Planet::updatePlanetOrbits() 
-{
+
+void Planet::updatePlanetOrbits() {
 
     mtx.lock();
     orbit_degree = orbit_degree + orbit_speed;
@@ -61,19 +61,19 @@ void Planet::updatePlanetOrbits()
     }
 
     json data;
-    
+
     data["id"] = id;;
-    data["orbit_degree"] = orbit_degree;
+    data["orb_degree"] = orbit_degree;
 
     Connection::syncInstance(0, "SYNC_PLANET", "ORBIT_UPDATE", data.dump());
 
     mtx.unlock();
 }
 
-float Planet::getPlanetOrbitSpeed() 
-{
-    // orbit_speed is a function of 1/radius^2 * a configurable planet tick speed 
-    orbit_speed = (float)(1/orbit_radius^2)*planet_tick_speed;
+
+float Planet::getPlanetOrbitSpeed() {
+    // orbit_speed is a function of 1/radius^2 * a configurable planet tick speed
+    orbit_speed = (float) (1/(pow(orbit_radius, 2)))*planet_tick_speed;
 
     return orbit_speed;
 }

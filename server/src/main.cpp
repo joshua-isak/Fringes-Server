@@ -28,11 +28,11 @@ map <int, Planet*> planets;          // map of all planets
 map <int, Star*> stars;              // map of all stars
 
 
-// Periodically check if ships have arrived at their destination
+// Update the simulation every second
 void update() {
 
     map<int, Ship*>::iterator it;
-    map<int, Planets*>::iterator ip;
+    map<int, Planet*>::iterator ip;
     time_t current_time;
     time_t next_update_time = time(NULL);
 
@@ -41,8 +41,10 @@ void update() {
         // Get the current UNIX timestamp
         current_time = time(NULL);
 
-        if (current_time = next_update_time) {
-            for(ip planets.begin(); ip != planets.end(); ip++) {
+        // Update the orbit degree of all planets every minute
+        if (current_time == next_update_time) {
+            Logger::log_message("Updated all planet orbits", 1, Logger::CYAN);
+            for(ip = planets.begin(); ip != planets.end(); ip++) {
                 Planet *this_planet = ip->second;
                 this_planet->updatePlanetOrbits();
             }
@@ -103,7 +105,7 @@ int main(int argc, char *argv[]) {
 
 
     // Launch thread to check ship progress
-    thread t1(checkShipProgress, &ships);
+    thread t1(update);
 
 
     // Set up TCP listener
