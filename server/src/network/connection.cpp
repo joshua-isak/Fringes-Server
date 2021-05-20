@@ -75,11 +75,6 @@ void Connection::operator()(int _socket_id, struct sockaddr_in address) {
         Connection::syncInstance(socket_id, "SYNC_COMPANY", "INITIAL", this_company->getJsonString());
     }
 
-    // Complete connection
-    connections.insert({socket_id, this});      // add to map of connections
-
-    // Log client connection
-    Logger::log_message(username + " has connected", 0, Logger::YELLOW);
 
     while (true) {
 
@@ -275,7 +270,13 @@ int Connection::doHandshake() {
         return -1;
     }
 
+    // Complete connection
+    connections.insert({socket_id, this});      // add to map of connections
     username = _username;                       // set connection's username
+
+    // Log client connection
+    Logger::log_message(username + " has connected", 0, Logger::YELLOW);
+
 
     return 0;   // return success
 }
