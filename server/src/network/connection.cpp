@@ -207,6 +207,14 @@ int Connection::doHandshake() {
     int c_length = data[seek];                      // command string length
     string command (&data[seek+1], 5);//c_length-1);     // command string (-1 to trim off extra whitespace)
 
+    // Check if client sent the HELLO command
+    string hello = "HELLO";
+    if (command != "HELLO") {
+        last_error = "connection: malformed client HELLO";
+        this->sendError("Malformed HELLO message");
+        return -1;
+    }
+
     // Read in version string
     seek += c_length + 1;
     int v_length = data[seek];                      // version string length
@@ -222,13 +230,6 @@ int Connection::doHandshake() {
     int p_length = data[seek];                      // _password string length
     string _password (&data[seek+1], p_length-1);   // _password string
 
-    // Check if client sent the HELLO command
-    string hello = "HELLO";
-    if (command != "HELLO") {
-        last_error = "connection: malformed client HELLO";
-        this->sendError("Malformed HELLO message");
-        return -1;
-    }
 
     // Make sure client version is compatible
     if (version != version) {
