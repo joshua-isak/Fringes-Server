@@ -43,6 +43,12 @@ Address Spaceport::getAddress() {
     return address;
 }
 
+void Spaceport::setOrbit(float new_orbit_degree) {
+    mtx.lock();
+    address.orb_degrees = new_orbit_degree;
+    mtx.unlock();
+}
+
 
 string Spaceport::getName() {
     return name;
@@ -61,8 +67,8 @@ string Spaceport::getJsonString() {
     //x["address"]["star_name"] = address.star_name;
     x["address"]["star_id"] = address.star_id;
     x["address"]["planet_id"] = address.planet_id;
-    x["address"]["orb_radius"] = address.orb_radius;
-    x["address"]["orb_degrees"] = address.orb_degrees;
+    //x["address"]["orb_radius"] = address.orb_radius;
+    //x["address"]["orb_degrees"] = address.orb_degrees;
     x["address"]["star_x"] = address.star_x;
     x["address"]["star_y"] = address.star_y;
 

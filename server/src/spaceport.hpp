@@ -62,6 +62,9 @@ public:
     // Get spaceport address
     Address getAddress();
 
+    // Set spaceport address.orbit_degree
+    void setOrbit(float new_orbit_deg);
+
     // Get spaceport name
     string getName();
 

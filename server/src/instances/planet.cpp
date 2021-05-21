@@ -60,6 +60,11 @@ void Planet::updatePlanetOrbits() {
         orbit_degree = orbit_degree - 360;
     }
 
+    // Update attached station's address (only on the server though!) if it has one
+    if (spaceport_id != 0) {
+        spaceports[spaceport_id]->setOrbit(orbit_degree);
+    }
+
     json data;
 
     data["id"] = id;;
