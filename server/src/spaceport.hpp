@@ -20,6 +20,7 @@ class Ship;
 using namespace std;
 
 
+// Struct to contain station address information
 struct Address {
     int star_id;
     int planet_id;

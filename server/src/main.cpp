@@ -6,8 +6,6 @@
 
 #include "server/src/globals.hpp"
 
-//#include "ship.hpp"
-//#include "spaceport.hpp"
 #include "server/src/network/listener.hpp"
 #include "server/src/logger.hpp"
 
@@ -24,8 +22,9 @@ map <int, Ship*> ships;                // map of all ships (id, pointer)
 map <int, Spaceport*> spaceports;      // map of all spaceports (id, pointer)
 map <int, Connection*> connections;    // map of all active TCP connections
 map <int, Company*> companies;         // map of all companies (id, pointer)
-map <int, Planet*> planets;          // map of all planets
-map <int, Star*> stars;              // map of all stars
+map <int, Planet*> planets;            // map of all planets
+map <int, Star*> stars;                // map of all stars
+map <int, Cargo*> cargos;              // map of all cargo instances
 
 
 // Update the simulation every second
@@ -43,7 +42,7 @@ void update() {
 
         // Update the orbit degree of all planets every minute
         if (current_time >= next_update_time) {
-            Logger::log_message("Updated all planet orbits", 2, Logger::CYAN);
+            Logger::log_message("Updating all planet orbits", 4, Logger::CYAN);
             for(ip = planets.begin(); ip != planets.end(); ip++) {
                 Planet *this_planet = ip->second;
                 this_planet->updatePlanetOrbits();
