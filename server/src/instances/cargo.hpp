@@ -14,8 +14,11 @@ multiple instances.
 
 using namespace std;
 
+
 // Collection of information that can be shared between cargo instances
 struct cargo_type {
+    int id;                 // unique product id
+
     string name;            // name of cargo
     string description;     // flavortext description of cargo
 
@@ -24,7 +27,8 @@ struct cargo_type {
 };
 
 
-// Object attached to a spaceport that handles generation of specfic new cargo instances
+
+// POD attached to a spaceport that handles generation of specfic new cargo instances
 struct Producer {
     int id;                     // unique producer id
     int spaceport_id;           // id of spaceport this producer is attached to
@@ -38,11 +42,11 @@ struct Producer {
     int dest_pref_weight;       // percent of total new products reserved for preferred destination
 
     float weight;               // percent of total manifest to allocate to this product (0 to 1)
-
 };
 
 
-// Object attached to a spaceport to let Producers know where new cargo should be routed
+
+// POD attached to a spaceport to let Producers know where new cargo should be routed
 struct Consumer {
     int id;
     int spaceport_id;
@@ -50,19 +54,23 @@ struct Consumer {
     cargo_type *product;
 
     int demand;
-
 };
+
 
 
 class Cargo {
 public:
-    static int id_counter;      // value of next unique cargo id to be issued
+    static int id_counter;                      // value of next unique cargo id to be issued
+    static int product_id_counter;
+    static int producer_id_counter;
+    static int consumer_id_counter;
+    static map <int, cargo_type*> all_products;  // map of all cargo_types
+    static map <int , Producer*> producers;      // map of all spaceport's producers
 
 private:
     int id;                     // unique cargo instance id
 
-    cargo_type info;            // flyweight info struct
-    int info_id;                // id of info struct
+    cargo_type *info;           // flyweight info struct
 
     Spaceport *origin;          // spaceport of origin
     Spaceport *destination;     // destination spaceport
@@ -75,7 +83,10 @@ private:
 
 public:
     // Constructor
-    Cargo();
+    Cargo(cargo_type *type, Spaceport *origin, Spaceport *dest);
+
+    // Destructor
+    ~Cargo();
 
     // Get cargo id
     int getId();
@@ -83,7 +94,10 @@ public:
     // Get cargo value (final value)
     int getValue();
 
-    // Return all of cargo instance's information as a json string
+    // Create a new cargo_type struct and add it to the map of all products
+    static cargo_type* addProduct(string name, string desc, float volatility, int base_val);
+
+    // Return all of a cargo instance's information as a json string
     string getJsonString();
 
     // Initial sync all cargo types to the client belonging to client_id

@@ -55,6 +55,30 @@ string Spaceport::getName() {
 }
 
 
+int Spaceport::addProducer(cargo_type *product, int _max, int _min, int dest_pref, int dest_pref_weight, float _weight) {
+
+    // Allocate a new producer and add it to its cargo map and this station's map
+    Producer *x = new Producer();
+
+    x->id = Cargo::producer_id_counter;
+    Cargo::producer_id_counter++;
+    x->spaceport_id = id;
+    x->product = product;
+    x->max_manifest = _max;
+    x->min_manifest = _min;
+    x->dest_pref = dest_pref;
+    x->dest_pref_weight = dest_pref_weight;
+    x->weight = _weight;
+
+    Cargo::producers.insert({x->id, x});
+    my_producers.insert({x->id, x});
+
+    Logger::log_message("New producer for " + x->product->name + " created at " + name, 1, Logger::GREEN);
+
+    return 1;
+}
+
+
 string Spaceport::getJsonString() {
 
     json x;

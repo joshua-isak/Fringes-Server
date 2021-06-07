@@ -79,6 +79,10 @@ int main(int argc, char *argv[]) {
     // Set debug level for logger
     Logger::debug_level = 3;
 
+    // Initialize cargo products
+    cargo_type *antimatter = Cargo::addProduct("Antimatter", "", 0.2, 25);
+    cargo_type *passenger = Cargo::addProduct("Passenger", "", 0, 8);
+
     // Initialize Stars, planets and spaceports
     Star *star1 = new Star("Sol", yellow, 0, 0);
     Star *star2 = new Star("Alpha Centauri", yellow, 0.6, -2.1);
@@ -102,12 +106,15 @@ int main(int argc, char *argv[]) {
     Planet *p7 = star1->addPlanet("Uranus", 5.4, 0);
     Planet *p8 = star1->addPlanet("Neptune", 6, 260);
 
-    p2->addSpaceport("Gaia Station", 1);
-    p3->addSpaceport("Terra Station", 1);
-    p4->addSpaceport("Ares Stellar Gate", 1);
-    p5->addSpaceport("Colony of Europa", 1);
-    p6->addSpaceport("Titan Forges", 1);
-    p8->addSpaceport("The Bastion", 1);
+    Spaceport *sp1 = p3->addSpaceport("Terra Station", 1);
+    Spaceport *sp2 = p2->addSpaceport("Gaia Station", 1);
+    Spaceport *sp3 = p4->addSpaceport("Ares Stellar Gate", 1);
+    Spaceport *sp4 = p5->addSpaceport("Colony of Europa", 1);
+    Spaceport *sp5 = p6->addSpaceport("Titan Forges", 1);
+    Spaceport *sp6 = p8->addSpaceport("The Bastion", 1);
+
+    sp1->addProducer(antimatter, 3, 0, 0, 0, 0.1);
+    sp1->addProducer(passenger, 7, 5, 0, 0, 0.5);
 
     Planet *p9 = star2->addPlanet("Alpha Centauri I", 0.6, 20);
     Planet *p10 = star2->addPlanet("Haven", 1.9, 90);

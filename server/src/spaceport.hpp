@@ -12,12 +12,16 @@ Spaceports are attached to planets which are attached to stars
 
 #include "server/src/globals.hpp"
 
+using namespace std;
+
 // Forward declare these classes to make the compiler happy...
 class Star;
 class Planet;
 class Ship;
-
-using namespace std;
+class Cargo;
+struct Producer;
+struct Consumer;
+struct cargo_type;
 
 
 // Struct to contain station address information
@@ -49,6 +53,8 @@ private:
     Planet *planet;                     // pointer to planet this spaceport is around
 
     map <int, Ship*> docked_ships;      // map of all ships currently docked at this station
+
+    map <int, Producer*> my_producers;  // map of all of the station's cargo producers
     //map <> cargo                      // map containing the station's cargo bulletin
 
     mutex mtx;
@@ -74,4 +80,8 @@ public:
 
     // Return the distance between this spaceport and the provided one (interstellar or intrastellar)
     float getDistance(Spaceport *b);
+
+    // Create a new producer at this spaceport for an existing cargo_type
+    int addProducer(cargo_type *product, int _max, int _min, int dest_pref, int dest_pref_weight, float _weight);
+
 };
