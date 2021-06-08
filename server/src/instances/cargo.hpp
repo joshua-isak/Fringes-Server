@@ -29,6 +29,9 @@ struct cargo_type {
 
     float volatility;       // 0 to 1, higher is more volatile
     int base_value;         // base delivery payout
+
+    map<int, Producer*> producers;   // map of all producers for this product
+    map<int, Consumer*> consumers;   // map of all consumers for this product
 };
 
 
@@ -70,7 +73,8 @@ public:
     static int producer_id_counter;
     static int consumer_id_counter;
     static map <int, cargo_type*> all_products;  // map of all cargo_types
-    static map <int , Producer*> producers;      // map of all spaceport's producers
+    static map <int , Producer*> producers;      // map of all producers
+    static map <int, Consumer*> consumers;       // map of all consumers
 
 private:
     int id;                     // unique cargo instance id

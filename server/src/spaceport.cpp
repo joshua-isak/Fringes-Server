@@ -19,12 +19,14 @@ Spaceport::Spaceport(string _name, int _class, Address _address, Star *mystar, P
     id_counter += 1;
 
     // Set initial variables
-    //id = _id;
     name = _name;
-    station_class = _class;
+    station_level = _class;
     address = _address;
     star = mystar;
     planet = myplanet;
+    target_cargo = station_level * 10;
+    cargo_update_frequency = 180;           // update cargo manifest every 3 minutes
+    next_cargo_update = time(NULL) + 3;     // wait 3 seconds before first cargo update
 
     // Add spaceport to map of all spaceports
     spaceports.insert({id, this});
@@ -54,14 +56,19 @@ string Spaceport::getName() {
     return name;
 }
 
+time_t Spaceport::getCargoUpdateTime() {
+    return next_cargo_update;
+}
+
 
 int Spaceport::addProducer(cargo_type *product, int _max, int _min, int dest_pref, int dest_pref_weight, float _weight) {
 
-    // Allocate a new producer and add it to its cargo map and this station's map
+    // Allocate a new producer and add it to the relevant maps
     Producer *x = new Producer();
 
-    x->id = Cargo::producer_id_counter;
+    x->id = Cargo::producer_id_counter;     // assign a new id and iterate the counter
     Cargo::producer_id_counter++;
+
     x->spaceport_id = id;
     x->product = product;
     x->max_manifest = _max;
@@ -70,10 +77,34 @@ int Spaceport::addProducer(cargo_type *product, int _max, int _min, int dest_pre
     x->dest_pref_weight = dest_pref_weight;
     x->weight = _weight;
 
-    Cargo::producers.insert({x->id, x});
-    my_producers.insert({x->id, x});
+    Cargo::producers.insert({x->id, x});        // add this producer to map of all producers
+    my_producers.insert({x->id, x});            // add this producer to this station's map of its producers
+    product->producers.insert({x->id, x});   // add this producer to product's map of its producers
 
     Logger::log_message("New producer for " + x->product->name + " created at " + name, 1, Logger::GREEN);
+
+    return 1;
+}
+
+
+int Spaceport::addConsumer(cargo_type *product, int demand) {
+
+    // Allocate a new consumer and add it to the relevant maps
+    Consumer *x = new Consumer();
+
+    x->id = Cargo::consumer_id_counter;     // assign a new id and iterate the counter
+    Cargo::consumer_id_counter++;
+
+    x->spaceport_id = id;
+    x->product = product;
+    x->demand = demand;
+
+    // Add to all relevant map of consumers
+    Cargo::consumers.insert({x->id, x});
+    my_consumers.insert({x->id, x});
+    product->consumers.insert({x->id, x});
+
+    Logger::log_message("New consumer for " + x->product->name + " created at " + name, 1, Logger::GREEN);
 
     return 1;
 }
@@ -94,22 +125,87 @@ Cargo* Spaceport::removeCargo(int cargo_id) {
     // Remove cargo from station's manifest
     my_cargo.erase(cargo_id);
 
-    // Update all clients on this station's new cargo bulletin
-    json x;
+    mtx.unlock();
 
-    vector <int> my_cargo_ids;
-    for (auto const& element : my_cargo) {
-        my_cargo_ids.push_back(element.first);
+    // Update all clients on this station's new cargo bulletin
+    Connection::syncInstance(0, "SYNC_STATION", "CARGO", this->getCargoAndIdJson() );
+
+    return this_cargo;
+}
+
+
+int Spaceport::updateCargoManifest(bool force) {
+    int num_cargo_created = 0;
+
+    // Remove and delete all cargo from manifest
+    if (force) {
+
+        // Clear the station's manifest
+        mtx.lock();
+        map<int, Cargo*> old_manifest = my_cargo;
+        my_cargo.clear();
+        mtx.unlock();
+
+        // Tell all clients the station's manifest is now empty
+        Connection::syncInstance(0, "SYNC_STATION", "CARGO", this->getCargoAndIdJson() );
+
+        // Iterate through all of this spaceport's old cargo and delete the cargo instances
+        map<int, Cargo*>::iterator it;
+        for (it = old_manifest.begin(); it != old_manifest.end(); it++) { delete(it->second); }
     }
 
-    x["cargo"] = my_cargo_ids;
-    x["id"] = id;
+    mtx.lock();
+
+    // Add cargo to the manifest until the target amount is reached
+    map<int, Producer*>::iterator ip;
+    while (my_cargo.size() < target_cargo) {
+
+        // Skip all this if there are no producers
+        if (my_producers.size() == 0) { break; }
+
+        // Iterate through all producers
+        for (ip = my_producers.begin(); ip != my_producers.end(); ip++) {
+
+            map<int, Consumer*> ip_consumers = ip->second->product->consumers;  // sanity variable
+
+            // Choose a random consumer for this producer's product   //--TODO--// This is SUPER SLOW
+            map<int, Consumer*>::iterator random_consumer = ip_consumers.begin();
+            int random_index = rand() % ip_consumers.size();
+            advance(random_consumer, random_index);
+
+            // Add a cargo bound for the above consumer to this spaceport's manifest
+            Cargo *new_cargo = new Cargo(ip->second->product, this, spaceports[random_consumer->second->spaceport_id]);
+            my_cargo.insert({new_cargo->getId(), new_cargo});
+        }
+    }
 
     mtx.unlock();
 
-    Connection::syncInstance(0, "SYNC_STATION", "CARGO", x.dump() );
+    // Update clients on this spaceport's new cargo manifest
+    Connection::syncInstance(0, "SYNC_STATION", "CARGO", this->getCargoAndIdJson() );
 
-    return this_cargo;
+    // Reset the time until next manifest update
+    next_cargo_update = time(NULL) + cargo_update_frequency;
+
+    return num_cargo_created;
+}
+
+
+string Spaceport::getCargoAndIdJson() {
+
+    json x;
+
+    mtx.lock();
+
+    vector <int> my_cargo_ids;
+    for (auto const& element : my_cargo) { my_cargo_ids.push_back(element.first); }
+
+    x["id"] = id;
+    x["cargo"] = my_cargo_ids;
+
+    mtx.unlock();
+
+    return x.dump();
 }
 
 
@@ -121,8 +217,7 @@ string Spaceport::getJsonString() {
 
     x["id"] = id;
     x["name"] = name;
-    x["station_class"] = station_class;
-    //x["address"]["star_name"] = address.star_name;
+    x["station_level"] = station_level;
     x["address"]["star_id"] = address.star_id;
     x["address"]["planet_id"] = address.planet_id;
     //x["address"]["orb_radius"] = address.orb_radius;
@@ -130,7 +225,7 @@ string Spaceport::getJsonString() {
     x["address"]["star_x"] = address.star_x;
     x["address"]["star_y"] = address.star_y;
 
-    // cargo bulletin
+    // cargo bulletin, id of all contained cargo instances
     vector <int> my_cargo_ids;
     for (auto const& element : my_cargo) {
         my_cargo_ids.push_back(element.first);

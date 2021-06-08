@@ -14,6 +14,7 @@ int Cargo::producer_id_counter = 1;
 int Cargo::consumer_id_counter = 1;
 map <int, cargo_type*> Cargo::all_products;
 map <int, Producer*> Cargo::producers;
+map <int, Consumer*> Cargo::consumers;
 
 
 Cargo::Cargo(cargo_type *type, Spaceport *_origin, Spaceport *_dest) {
@@ -40,7 +41,8 @@ Cargo::Cargo(cargo_type *type, Spaceport *_origin, Spaceport *_dest) {
 
     // Log new cargo instance creation
     Logger::log_message("New cargo instance: " + info->name + " at: "
-    + origin->getName() + " value: " + to_string(value), 3, Logger::GREEN);
+    + origin->getName() + " value: " + to_string(value) + " dest: " + destination->getName()
+    , 3, Logger::GREEN);
 }
 
 

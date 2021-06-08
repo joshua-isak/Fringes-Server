@@ -30,10 +30,11 @@ map <int, Cargo*> cargos;              // map of all cargo instances
 // Update the simulation every second
 void update() {
 
-    map<int, Ship*>::iterator it;
-    map<int, Planet*>::iterator ip;
+    map<int, Ship*>::iterator it;           // ship iterator
+    map<int, Planet*>::iterator ip;         // planet iterator
+    map<int, Spaceport*>::iterator is;      // spaceport iterator
     time_t current_time;
-    time_t next_update_time = time(NULL);
+    time_t next_update_time = time(NULL);   // next time to update planet orbits
 
     while (true) {
 
@@ -47,7 +48,7 @@ void update() {
                 Planet *this_planet = ip->second;
                 this_planet->updatePlanetOrbits();
             }
-            next_update_time += 60;
+            next_update_time = current_time + 60;
         }
 
         // Loop through all warping ships and check if their arrival time has passed, call arrive() if so
@@ -65,6 +66,18 @@ void update() {
             }
         }
 
+        // Loop through all spaceports and check if it is time to update their cargo manifest, do if so
+        for (is = spaceports.begin(); is != spaceports.end(); is++) {
+
+            Spaceport *this_spaceport = is->second;
+
+            // Skip this spaceport if it is not time to update its cargo manifest
+            if (current_time <= this_spaceport->getCargoUpdateTime()) { continue; }
+
+            // Update the cargo manifest
+            int num_created = this_spaceport->updateCargoManifest(true);
+        }
+
         // Wait PROGRESS_INTERVAL seconds until next check
         this_thread::sleep_for(chrono::seconds(PROGRESS_INTERVAL));
     }
@@ -80,7 +93,7 @@ int main(int argc, char *argv[]) {
     Logger::debug_level = 3;
 
     // Initialize cargo products
-    cargo_type *antimatter = Cargo::addProduct("Antimatter", "", 0.2, 25);
+    cargo_type *antimatter = Cargo::addProduct("Antimatter", "", 0.01, 25);
     cargo_type *passenger = Cargo::addProduct("Passenger", "", 0, 8);
 
     // Initialize Stars, planets and spaceports
@@ -106,7 +119,7 @@ int main(int argc, char *argv[]) {
     Planet *p7 = star1->addPlanet("Uranus", 5.4, 0);
     Planet *p8 = star1->addPlanet("Neptune", 6, 260);
 
-    Spaceport *sp1 = p3->addSpaceport("Terra Station", 1);
+    Spaceport *sp1 = p3->addSpaceport("Terra Station", 2);
     Spaceport *sp2 = p2->addSpaceport("Gaia Station", 1);
     Spaceport *sp3 = p4->addSpaceport("Ares Stellar Gate", 1);
     Spaceport *sp4 = p5->addSpaceport("Colony of Europa", 1);
@@ -114,7 +127,11 @@ int main(int argc, char *argv[]) {
     Spaceport *sp6 = p8->addSpaceport("The Bastion", 1);
 
     sp1->addProducer(antimatter, 3, 0, 0, 0, 0.1);
-    sp1->addProducer(passenger, 7, 5, 0, 0, 0.5);
+    sp2->addConsumer(antimatter, 0);
+    sp3->addConsumer(antimatter, 0);
+    sp4->addConsumer(antimatter, 0);
+    sp5->addConsumer(antimatter, 0);
+    sp6->addConsumer(antimatter, 0);
 
     Planet *p9 = star2->addPlanet("Alpha Centauri I", 0.6, 20);
     Planet *p10 = star2->addPlanet("Haven", 1.9, 90);

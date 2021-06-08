@@ -2,6 +2,8 @@
 Instance that represents a spaceport
 
 Spaceports are attached to planets which are attached to stars
+
+Only spaceports can produce new cargo instances
 */
 
 #pragma once
@@ -45,7 +47,7 @@ private:
     int id;                             // unique spaceport id
     string name;                        // spaceport name
 
-    int station_class;                  // station level of development
+    int station_level;                  // station level of development
 
     Address address;                    // station location in space
 
@@ -55,7 +57,11 @@ private:
     map <int, Ship*> docked_ships;      // map of all ships currently docked at this station
 
     map <int, Producer*> my_producers;  // map of all of the station's cargo producers
+    map <int, Consumer*> my_consumers;  // map of all of the station's cargo consumers
     map <int, Cargo*> my_cargo;         // map containing the station's cargo bulletin
+    int target_cargo;                   // target number of cargo instances to keep in bulletin
+    time_t next_cargo_update;           // timestamp of next update to cargo bulletin
+    int cargo_update_frequency;         // how often to update cargo bulletin (in seconds)
 
     mutex mtx;
 
@@ -78,11 +84,23 @@ public:
     // Get all spaceport information as a json string
     string getJsonString();
 
+    // Get spaceport id and cargo manifest json string
+    string getCargoAndIdJson();
+
     // Return the distance between this spaceport and the provided one (interstellar or intrastellar)
     float getDistance(Spaceport *b);
 
+    // Return the next cargo manifest update time for this spaceport
+    time_t getCargoUpdateTime();
+
     // Create a new producer at this spaceport for an existing cargo_type
     int addProducer(cargo_type *product, int _max, int _min, int dest_pref, int dest_pref_weight, float _weight);
+
+    // Create a new consumer at this spaceport for an existing cargo_type
+    int addConsumer(cargo_type *product, int demand);
+
+    // Produce new cargo, return number of new cargo created, force = true remakes entire bulletin and deletes old cargo
+    int updateCargoManifest(bool force);
 
     // Remove cargo with id cargo_id from this spaceport's manifest, return NULL for error
     Cargo* removeCargo(int cargo_id);
