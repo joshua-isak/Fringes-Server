@@ -3,6 +3,9 @@ Instance that represents a unit of cargo.
 
 Flyweight model is used with cargo_info struct that contains information that can be shared among
 multiple instances.
+
+Spaceports use Producers to generate new cargo, Consumers tell producers where to route their
+produced cargo.
 */
 
 #pragma once
@@ -28,7 +31,7 @@ struct cargo_type {
 
 
 
-// POD attached to a spaceport that handles generation of specfic new cargo instances
+// POD attached to a spaceport that gives info on generation of specfic new cargo instances
 struct Producer {
     int id;                     // unique producer id
     int spaceport_id;           // id of spaceport this producer is attached to
@@ -101,7 +104,7 @@ public:
     string getJsonString();
 
     // Initial sync all cargo types to the client belonging to client_id
-    int syncAllCargoTypes(int client_id);
+    int syncAllProducts(int client_id);
 
     // Initial sync all cargo instances to the client belonging to client_id
     int syncAllCargo(int client_id);

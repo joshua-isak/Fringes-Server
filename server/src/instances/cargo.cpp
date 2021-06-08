@@ -35,6 +35,9 @@ Cargo::Cargo(cargo_type *type, Spaceport *_origin, Spaceport *_dest) {
     // Add to map of cargos
     cargos.insert({id, this});
 
+    // Tell all clients this cargo was created
+    Connection::syncInstance(0, "SYNC_CARGO", "INITIAL", this->getJsonString() );
+
     // Log new cargo instance creation
     Logger::log_message("New cargo instance: " + info->name + " at: "
     + origin->getName() + " value: " + to_string(value), 3, Logger::GREEN);
@@ -44,6 +47,12 @@ Cargo::Cargo(cargo_type *type, Spaceport *_origin, Spaceport *_dest) {
 Cargo::~Cargo() {
     // Remove from map of all cargos
     cargos.erase(id);
+
+    // Tell all clients this cargo was destroyed
+    json x;
+    x["id"] = id;
+    Connection::syncInstance(0, "SYNC_CARGO", "DESTROY", x.dump() );
+
     Logger::log_message("Destroyed a cargo", 3, "");
 }
 
@@ -73,6 +82,17 @@ cargo_type* Cargo::addProduct(string name, string desc, float volatility, int ba
 
     all_products.insert({x->id, x});
 
+    // Tell all clients this product was created
+    json z;
+
+    z["id"] = x->id;
+    z["name"] = x->name;
+    z["desc"] = x->description;
+    z["volatility"] = x->volatility;
+    z["base_val"] = x->base_value;
+
+    Connection::syncInstance(0, "SYNC_CARGO", "SYNC_PRODUCT", z.dump() );
+
     Logger::log_message("New product created: " + name, 1, Logger::GREEN);
 
     return x;
@@ -97,11 +117,37 @@ string Cargo::getJsonString() {
 }
 
 
-int Cargo::syncAllCargoTypes(int client_id) {
-    return 0;
+int Cargo::syncAllProducts(int client_id) {
+
+    map<int, cargo_type*>::iterator it;
+
+    for (it = all_products.begin(); it != all_products.end(); it++) {
+        cargo_type *this_product = it->second;
+
+        json x;
+        x["id"] = this_product->id;
+        x["name"] = this_product->name;
+        x["desc"] = this_product->name;
+        x["volatility"] = this_product->volatility;
+        x["base_val"] = this_product->base_value;
+
+        Connection::syncInstance(client_id, "SYNC_CARGO", "PRODUCT", x.dump() );
+    }
+
+    return 1;   // return success
 }
 
 
 int Cargo::syncAllCargo(int client_id) {
-    return 0;
+
+    map<int, Cargo*>::iterator it;
+
+    // Iterate through all cargos and send them to a client
+    for (it = cargos.begin(); it != cargos.end(); it++) {
+        Cargo *this_cargo = it->second;
+
+        Connection::syncInstance(client_id, "SYNC_CARGO", "INITIAL", this_cargo->getJsonString() );
+    }
+
+    return 1;   // return success
 }
