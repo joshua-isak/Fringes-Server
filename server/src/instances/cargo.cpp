@@ -67,6 +67,11 @@ int Cargo::getValue() {
 }
 
 
+Spaceport* Cargo::getOrigin() {
+    return origin;
+}
+
+
 cargo_type* Cargo::addProduct(string name, string desc, float volatility, int base_value) {
 
     // Allocate a new cargo_type and add it to its map

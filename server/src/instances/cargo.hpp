@@ -6,6 +6,8 @@ multiple instances.
 
 Spaceports use Producers to generate new cargo, Consumers tell producers where to route their
 produced cargo.
+
+Cargo instances contain no reference to the spaceport or ship that they currently belong to.
 */
 
 #pragma once
@@ -96,6 +98,9 @@ public:
 
     // Get cargo value (final value)
     int getValue();
+
+    // Get cargo origin spaceport
+    Spaceport* getOrigin();
 
     // Create a new cargo_type struct and add it to the map of all products
     static cargo_type* addProduct(string name, string desc, float volatility, int base_val);

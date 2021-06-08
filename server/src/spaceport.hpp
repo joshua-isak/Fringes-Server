@@ -55,7 +55,7 @@ private:
     map <int, Ship*> docked_ships;      // map of all ships currently docked at this station
 
     map <int, Producer*> my_producers;  // map of all of the station's cargo producers
-    //map <> cargo                      // map containing the station's cargo bulletin
+    map <int, Cargo*> my_cargo;         // map containing the station's cargo bulletin
 
     mutex mtx;
 
@@ -84,4 +84,6 @@ public:
     // Create a new producer at this spaceport for an existing cargo_type
     int addProducer(cargo_type *product, int _max, int _min, int dest_pref, int dest_pref_weight, float _weight);
 
+    // Remove cargo with id cargo_id from this spaceport's manifest, return NULL for error
+    Cargo* removeCargo(int cargo_id);
 };

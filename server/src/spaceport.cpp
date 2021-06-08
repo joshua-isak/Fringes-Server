@@ -79,6 +79,40 @@ int Spaceport::addProducer(cargo_type *product, int _max, int _min, int dest_pre
 }
 
 
+Cargo* Spaceport::removeCargo(int cargo_id) {
+
+    mtx.lock();
+
+    // Make sure cargo_id is in station's manifest
+    if (my_cargo.find(cargo_id) == my_cargo.end()) {
+        mtx.unlock();
+        return NULL;
+    }
+
+    Cargo *this_cargo = my_cargo[cargo_id];
+
+    // Remove cargo from station's manifest
+    my_cargo.erase(cargo_id);
+
+    // Update all clients on this station's new cargo bulletin
+    json x;
+
+    vector <int> my_cargo_ids;
+    for (auto const& element : my_cargo) {
+        my_cargo_ids.push_back(element.first);
+    }
+
+    x["cargo"] = my_cargo_ids;
+    x["id"] = id;
+
+    mtx.unlock();
+
+    Connection::syncInstance(0, "SYNC_STATION", "CARGO", x.dump() );
+
+    return this_cargo;
+}
+
+
 string Spaceport::getJsonString() {
 
     json x;
@@ -95,6 +129,13 @@ string Spaceport::getJsonString() {
     //x["address"]["orb_degrees"] = address.orb_degrees;
     x["address"]["star_x"] = address.star_x;
     x["address"]["star_y"] = address.star_y;
+
+    // cargo bulletin
+    vector <int> my_cargo_ids;
+    for (auto const& element : my_cargo) {
+        my_cargo_ids.push_back(element.first);
+    }
+    x["cargo"] = my_cargo_ids;
 
     mtx.unlock();
 

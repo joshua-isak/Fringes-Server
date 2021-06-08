@@ -176,7 +176,55 @@ void Ship::arrive() {
 }
 
 
-int Ship::addCargo() { return 0; }
+int Ship::addCargoFromSpaceport(int cargo_id) {
+
+    mtx.lock();
+
+    Cargo *this_cargo = cargos[cargo_id];
+
+    // Make sure this ship is docked at a spaceport
+    if (travel_state != DOCKED) {
+        last_error = registration + "cannot add cargo, not docked!";
+        mtx.unlock();
+        return -1;
+    }
+
+    // Make sure the cargo's origin is at the spaceport the ship is docked to
+    if (this_cargo->getOrigin() != current_spaceport) {
+        last_error = registration + "cannot add cargo, not at same spaceport as cargo!";
+        mtx.unlock();
+        return -1;
+    }
+
+    // TODO // Make sure the company can afford to purchase this cargo
+
+    // Remove cargo from spaceport's map of all cargo (and make sure it's still there)
+    if (this_cargo->getOrigin()->removeCargo(cargo_id) == NULL) {
+        last_error = registration + "cannot add cargo, not in spaceport's bulletin";
+        mtx.unlock();
+        return -1;
+    }
+
+    // Add cargo to this ship's map of all cargo
+    my_cargo.insert({this_cargo->getId(), this_cargo});
+
+    // Update this ship's cargo manifest to all clients
+    json x;
+
+    vector <int> my_cargo_ids;
+    for (auto const& element : my_cargo) {
+        my_cargo_ids.push_back(element.first);
+    }
+
+    x["cargo"] = my_cargo_ids;
+    x["id"] = id;
+
+    mtx.unlock();
+
+    Connection::syncInstance(0, "SYNC_SHIP", "CARGO", x.dump() );
+
+    return 0;   // return success
+}
 
 
 int Ship::removeCargo() { return 0; }
@@ -193,11 +241,16 @@ string Ship::getJsonString() {
     x["name"] = name;
     x["registration"] = registration;
     x["type"] = type;
-    // x["max_weight"] = max_weight;
-    // x["max_volume"] = max_volume;
     x["warps"] = total_warps;
     x["reliability"] = reliability;
+
     // cargo manifest
+    vector <int> my_cargo_ids;
+    for (auto const& element : my_cargo) {
+        my_cargo_ids.push_back(element.first);
+    }
+    x["cargo"] = my_cargo_ids;
+
     x["last_spaceport"] = last_spaceport->getId();
     x["next_spaceport"] = next_spaceport->getId();
     x["current_spaceport"] = current_spaceport->getId();

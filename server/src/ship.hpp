@@ -43,7 +43,7 @@ private:
 
     float reliability;                  // ship failure rate
 
-    //map <int, Cargo*> cargo;          // map containing ship's current cargo manifest
+    map <int, Cargo*> my_cargo;         // map containing ship's current cargo manifest
 
     Spaceport *last_spaceport;          // spaceport ship has departed from
     Spaceport *next_spaceport;          // spaceport ship is travelling to
@@ -67,8 +67,8 @@ public:
     // Mark the arrival of the ship to its destination
     void arrive();
 
-    // Add a cargo item to the ship
-    int addCargo();
+    // Remove a cargo from a spaceport and add it to this ship, returns -1 for error
+    int addCargoFromSpaceport(int cargo_id);
 
     // Remove a cargo item from the ship
     int removeCargo();
