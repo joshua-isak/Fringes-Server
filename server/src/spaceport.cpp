@@ -202,6 +202,7 @@ string Spaceport::getCargoAndIdJson() {
 
     x["id"] = id;
     x["cargo"] = my_cargo_ids;
+    x["cu_time"] = next_cargo_update;
 
     mtx.unlock();
 
@@ -224,6 +225,7 @@ string Spaceport::getJsonString() {
     //x["address"]["orb_degrees"] = address.orb_degrees;
     x["address"]["star_x"] = address.star_x;
     x["address"]["star_y"] = address.star_y;
+    x["cu_time"] = next_cargo_update;
 
     // cargo bulletin, id of all contained cargo instances
     vector <int> my_cargo_ids;
