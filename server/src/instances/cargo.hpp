@@ -113,8 +113,8 @@ public:
     string getJsonString();
 
     // Initial sync all cargo types to the client belonging to client_id
-    int syncAllProducts(int client_id);
+    static int syncAllProducts(int client_id);
 
     // Initial sync all cargo instances to the client belonging to client_id
-    int syncAllCargo(int client_id);
+    static int syncAllCargo(int client_id);
 };

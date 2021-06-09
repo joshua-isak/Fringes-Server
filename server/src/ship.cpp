@@ -57,7 +57,7 @@ int Ship::rename(string new_name) {
     // Log name change in console
     Logger::log_message(registration + " " + old_name + " changed name to " + new_name, 1, "");
 
-    // Tell all clients about name change
+    // Tell all clients about name change   //--TODO--// chance to only include name string and id in json
     Connection::syncInstance(0, "SYNC_SHIP", "RENAME", this->getJsonString());
 
     return 0;

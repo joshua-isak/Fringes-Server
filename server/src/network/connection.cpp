@@ -57,6 +57,10 @@ void Connection::operator()(int _socket_id, struct sockaddr_in address) {
         Connection::syncInstance(socket_id, "SYNC_SHIP", "INITIAL", this_ship->getJsonString());
     }
 
+    // Sync data for all products and cargo
+    Cargo::syncAllProducts(socket_id);
+    Cargo::syncAllCargo(socket_id);
+
     // Check if we need to generate a new company for this user
     if (Company::u_to_company.find(username) == Company::u_to_company.end()) {
         // Generate new company for this user
