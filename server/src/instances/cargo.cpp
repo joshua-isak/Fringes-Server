@@ -73,6 +73,10 @@ Spaceport* Cargo::getOrigin() {
     return origin;
 }
 
+Spaceport *Cargo::getDestination() {
+    return destination;
+}
+
 
 cargo_type* Cargo::addProduct(string name, string desc, float volatility, int base_value) {
 

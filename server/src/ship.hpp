@@ -36,14 +36,12 @@ private:
     string registration;                // unique registration number
     ship_type type;                     // ship class
 
-    int max_weight;                     // maximum total cargo weight
-    int max_volume;                     // maximum total cargo volume
-
     int total_warps;                    // number of times ship has entered warp
 
     float reliability;                  // ship failure rate
 
     map <int, Cargo*> my_cargo;         // map containing ship's current cargo manifest
+    int max_cargo;                      // maximum cargo instances this ship can hold
 
     Spaceport *last_spaceport;          // spaceport ship has departed from
     Spaceport *next_spaceport;          // spaceport ship is travelling to
@@ -70,8 +68,8 @@ public:
     // Remove a cargo from a spaceport and add it to this ship, returns -1 for error
     int addCargoFromSpaceport(int cargo_id);
 
-    // Remove a cargo item from the ship
-    int removeCargo();
+    // Remove a cargo from this ship and delete it
+    int removeCargoAndDestroy(int cargo_id);
 
     // Rename the ship
     int rename(string new_name);

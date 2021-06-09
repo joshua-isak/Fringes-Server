@@ -181,11 +181,11 @@ int Spaceport::updateCargoManifest(bool force) {
 
     mtx.unlock();
 
-    // Update clients on this spaceport's new cargo manifest
-    Connection::syncInstance(0, "SYNC_STATION", "CARGO", this->getCargoAndIdJson() );
-
     // Reset the time until next manifest update
     next_cargo_update = time(NULL) + cargo_update_frequency;
+
+    // Update clients on this spaceport's new cargo manifest
+    Connection::syncInstance(0, "SYNC_STATION", "CARGO", this->getCargoAndIdJson() );
 
     return num_cargo_created;
 }

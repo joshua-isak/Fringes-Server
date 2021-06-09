@@ -75,7 +75,7 @@ void update() {
             if (current_time <= this_spaceport->getCargoUpdateTime()) { continue; }
 
             // Update the cargo manifest
-            int num_created = this_spaceport->updateCargoManifest(true);
+            int num_created = this_spaceport->updateCargoManifest(false);
         }
 
         // Wait PROGRESS_INTERVAL seconds until next check

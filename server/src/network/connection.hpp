@@ -59,6 +59,9 @@ public:
     // depart a ship to a destination station, takes data to read from and current seek of that data
     int handleShipSend(char data[], int seek);
 
+    // add cargo from a spaceport to a ship
+    int handleAddCargoFromSpaceport(char data[], int seek);
+
     // rename a ship or company
     int handleRename(char data[], int seek);
 

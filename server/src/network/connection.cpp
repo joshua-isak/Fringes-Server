@@ -106,6 +106,8 @@ void Connection::operator()(int _socket_id, struct sockaddr_in address) {
 
         if (command == "RENAME") { this->handleRename(data, seek); }
 
+        if (command == "CARGO_SP_TO_SHIP") { this->handleAddCargoFromSpaceport(data, seek); }
+
     }
 }
 
@@ -360,6 +362,50 @@ int Connection::handleShipSend(char data[], int seek) {
     }
 
     return 0;   // return success
+}
+
+
+int Connection::handleAddCargoFromSpaceport(char data[], int seek) {
+
+    // Read in cargo id
+    uint32_t cargo_id;
+    memcpy(&cargo_id, data + seek, 4);
+    seek += 4;
+
+    // Read in ship id
+    uint16_t ship_id;
+    memcpy(&ship_id, data + seek, 2);
+
+    // Check if the cargo id is valid
+    if (cargos.find(cargo_id) == cargos.end()) {
+        Logger::log_message("connection: add_cargo: client sent bad cargo_id", 0, Logger::RED);
+        this->sendError("cargo id invalid!");
+        return -1;
+    }
+
+    // Check if the ship id is valid
+    if (ships.find(ship_id) == ships.end()) {
+        Logger::log_message("connection: add_cargo: client sent bad ship_id", 0, Logger::RED);
+        this->sendError("ship id invalid!");
+        return -1;
+    }
+
+    // Check if this ship belongs to this user's company
+    Ship *this_ship = ships[ship_id];
+    if (this_ship->getCompanyId() != company_id) {
+        Logger::log_message("connection: add_cargo: client tried to add cargo to a ship that isn't theirs!", 0, Logger::RED);
+        this->sendError("this ship does not belong to your company!");
+        return -1;
+    }
+
+    // Attempt to add cargo from the spaceport to the ship, return fail if any errors
+    if (this_ship->addCargoFromSpaceport(cargo_id) < 0) {
+        Logger::log_message("connection: add_cargo: " + this_ship->last_error, 0, Logger::RED);
+        this->sendError(this_ship->last_error);
+        return -1;
+    }
+
+    return 0;       // return success
 }
 
 

@@ -24,8 +24,7 @@ Ship::Ship(string _name, string _reg, ship_type _type, int m_w, int m_v, Spacepo
     name = _name;
     registration = _reg;
     type = _type;
-    max_weight = m_w;
-    max_volume = m_v;
+    max_cargo = 3;
     current_spaceport = startport;
     departure_time = 0;
     arrival_time = 0;
@@ -170,6 +169,24 @@ void Ship::arrive() {
     output = registration + " " + name + " has arrived at " + next_spaceport->getName();
     Logger::log_message(output, 0, "");
 
+    // Check if any of our cargo can be delivered to our arrival station
+    map<int, Cargo*>::iterator ic;
+    map<int, Cargo*> deliverable_cargo;
+
+    for (ic = my_cargo.begin(); ic != my_cargo.end(); ic++) {
+
+        Cargo *this_cargo = ic->second;
+
+        if (this_cargo->getDestination() == current_spaceport) {
+            deliverable_cargo.insert({this_cargo->getId(), this_cargo});
+        }
+    }
+
+    // Remove and destroy all deliverable cargo
+    for (ic = deliverable_cargo.begin(); ic != deliverable_cargo.end(); ic++) {
+        this->removeCargoAndDestroy(ic->first);
+    }
+
     // Tell all clients this ship has arrived
     Connection::syncInstance(0, "SYNC_SHIP", "ARRIVE", this->getJsonString());
 
@@ -184,14 +201,21 @@ int Ship::addCargoFromSpaceport(int cargo_id) {
 
     // Make sure this ship is docked at a spaceport
     if (travel_state != DOCKED) {
-        last_error = registration + "cannot add cargo, not docked!";
+        last_error = registration + " cannot add cargo, not docked!";
         mtx.unlock();
         return -1;
     }
 
     // Make sure the cargo's origin is at the spaceport the ship is docked to
     if (this_cargo->getOrigin() != current_spaceport) {
-        last_error = registration + "cannot add cargo, not at same spaceport as cargo!";
+        last_error = registration + " cannot add cargo, not at same spaceport as cargo!";
+        mtx.unlock();
+        return -1;
+    }
+
+    // Make sure adding this cargo does not exceed the ship's maximum capacity
+    if (my_cargo.size() + 1 > max_cargo) {
+        last_error = registration + " cannot add cargo, ship hold full";
         mtx.unlock();
         return -1;
     }
@@ -200,7 +224,7 @@ int Ship::addCargoFromSpaceport(int cargo_id) {
 
     // Remove cargo from spaceport's map of all cargo (and make sure it's still there)
     if (this_cargo->getOrigin()->removeCargo(cargo_id) == NULL) {
-        last_error = registration + "cannot add cargo, not in spaceport's bulletin";
+        last_error = registration + " cannot add cargo, not in spaceport's bulletin";
         mtx.unlock();
         return -1;
     }
@@ -227,7 +251,18 @@ int Ship::addCargoFromSpaceport(int cargo_id) {
 }
 
 
-int Ship::removeCargo() { return 0; }
+
+
+
+int Ship::removeCargoAndDestroy(int cargo_id) {
+
+    // Remove cargo from ship's manifest
+    my_cargo.erase(cargo_id);
+
+    // Remove cargo from existence
+    delete(cargos[cargo_id]);
+
+ }
 
 
 string Ship::getJsonString() {
@@ -250,6 +285,7 @@ string Ship::getJsonString() {
         my_cargo_ids.push_back(element.first);
     }
     x["cargo"] = my_cargo_ids;
+    x["max_cargo"] = max_cargo;
 
     x["last_spaceport"] = last_spaceport->getId();
     x["next_spaceport"] = next_spaceport->getId();

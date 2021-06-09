@@ -106,6 +106,9 @@ public:
     // Get cargo origin spaceport
     Spaceport* getOrigin();
 
+    // Get cargo destination spaceport
+    Spaceport* getDestination();
+
     // Create a new cargo_type struct and add it to the map of all products
     static cargo_type* addProduct(string name, string desc, float volatility, int base_val);
 
