@@ -27,8 +27,8 @@ Company::Company(string _name, string _user) {
     // Log company creation
     Logger::log_message("New company generated for " + user, 0, Logger::GREEN);
 
-    // Generate 7 ships for the company     // TESTING PURPOSES ONLY REALLY
-    for (int i = 0; i < 7; i++) {
+    // Generate 5 ships for the company     // TESTING PURPOSES ONLY REALLY
+    for (int i = 0; i < 5; i++) {
 
         int x = Ship::id_counter;
         string new_reg = "NCC-" + to_string(1000 + x);

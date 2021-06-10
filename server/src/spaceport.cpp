@@ -173,6 +173,9 @@ int Spaceport::updateCargoManifest(bool force) {
             int random_index = rand() % ip_consumers.size();
             advance(random_consumer, random_index);
 
+            // Don't use a consumer belonging to this own station
+            if (random_consumer->second->spaceport_id == id) { continue; }
+
             // Add a cargo bound for the above consumer to this spaceport's manifest
             Cargo *new_cargo = new Cargo(ip->second->product, this, spaceports[random_consumer->second->spaceport_id]);
             my_cargo.insert({new_cargo->getId(), new_cargo});

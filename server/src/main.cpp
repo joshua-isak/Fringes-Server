@@ -126,12 +126,19 @@ int main(int argc, char *argv[]) {
     Spaceport *sp5 = p6->addSpaceport("Titan Forges", 1);
     Spaceport *sp6 = p8->addSpaceport("The Bastion", 1);
 
-    sp1->addProducer(antimatter, 3, 0, 0, 0, 0.1);
-    sp2->addConsumer(antimatter, 0);
-    sp3->addConsumer(antimatter, 0);
-    sp4->addConsumer(antimatter, 0);
-    sp5->addConsumer(antimatter, 0);
-    sp6->addConsumer(antimatter, 0);
+    sp1->addProducer(passenger, 3, 0, 0, 0, 0.1);
+    sp2->addProducer(passenger, 3, 0, 0, 0, 0.1);
+    sp3->addProducer(passenger, 3, 0, 0, 0, 0.1);
+    sp4->addProducer(passenger, 3, 0, 0, 0, 0.1);
+    sp5->addProducer(passenger, 3, 0, 0, 0, 0.1);
+    sp6->addProducer(passenger, 3, 0, 0, 0, 0.1);
+
+    sp1->addConsumer(passenger, 0);
+    sp2->addConsumer(passenger, 0);
+    sp3->addConsumer(passenger, 0);
+    sp4->addConsumer(passenger, 0);
+    sp5->addConsumer(passenger, 0);
+    sp6->addConsumer(passenger, 0);
 
     Planet *p9 = star2->addPlanet("Alpha Centauri I", 0.6, 20);
     Planet *p10 = star2->addPlanet("Haven", 1.9, 90);
